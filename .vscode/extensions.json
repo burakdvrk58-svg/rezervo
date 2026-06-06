@@ -1,0 +1,28 @@
+{
+  "recommendations": [
+    // Essential
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    // TypeScript
+    "ms-vscode.vscode-typescript-next",
+    "orta.vscode-twoslash-queries",
+    // React
+    "dsznajder.es7-react-js-snippets",
+    "burkeholland.simple-react-snippets",
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    // Code Quality
+    "streetsidesoftware.code-spell-checker",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    // UI / Productivity
+    "PKief.material-icon-theme",
+    "GitHub.github-vscode-theme",
+    "aaron-bond.better-comments",
+    "wayou.vscode-todo-highlight",
+    // Next.js
+    "pulkitgangwar.nextjs-snippets"
+  ]
+}

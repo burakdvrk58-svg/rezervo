@@ -1,36 +1,139 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <h1>🗓️ Rezervo</h1>
+  <p><strong>Enterprise Reservation Management System</strong></p>
+  <p>Tüm rezervasyon ihtiyaçlarınız için hızlı, kolay ve güvenilir bir platform.</p>
 
-## Getting Started
+  <br/>
 
-First, run the development server:
+  ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?style=for-the-badge&logo=typescript)
+  ![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
+  ![shadcn/ui](https://img.shields.io/badge/shadcn-ui-000000?style=for-the-badge)
+
+</div>
+
+---
+
+## 📋 Proje Hakkında
+
+**Rezervo**, otel, uçuş, araç ve etkinlik rezervasyonlarını tek platformda yönetmenizi sağlayan enterprise-grade bir rezervasyon yönetim sistemidir.
+
+### 🎯 Roller
+- **Müşteri** — Rezervasyon yap, takip et, yönet
+- **İşletme** — Rezervasyon onayla, oda yönet, raporla
+- **Admin** — Kullanıcı yönetimi, analizler, sistem ayarları
+
+---
+
+## 🛠️ Tech Stack
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Framework | Next.js 16 (App Router) |
+| Dil | TypeScript (Strict Mode) |
+| Stil | Tailwind CSS |
+| UI Library | shadcn/ui |
+| State | Redux Toolkit |
+| Server State | TanStack Query |
+| Animasyon | Framer Motion |
+| Form | React Hook Form + Zod |
+| HTTP | Axios |
+| Charts | Recharts |
+| Theme | next-themes |
+
+---
+
+## 🚀 Başlangıç
+
+### Gereksinimler
+- Node.js 20+
+- npm 10+
+
+### Kurulum
 
 ```bash
+# Repository'yi klonla
+git clone https://github.com/KULLANICI_ADIN/rezervo.git
+cd rezervo
+
+# Bağımlılıkları yükle
+npm install
+
+# Environment variables
+cp .env.local.example .env.local
+# .env.local dosyasını düzenle
+
+# Geliştirme sunucusunu başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Uygulama **http://localhost:3000** adresinde çalışır.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Proje Yapısı
 
-## Learn More
+```
+src/
+├── app/              # Next.js App Router sayfaları
+├── components/       # Yeniden kullanılabilir UI bileşenleri
+├── features/         # Feature-based modüller
+├── layouts/          # Layout sarmalayıcılar
+├── hooks/            # Custom React hooks
+├── services/         # API servis katmanı
+├── store/            # Redux Toolkit store
+├── types/            # TypeScript tip tanımları
+├── constants/        # Uygulama sabitleri
+├── utils/            # Yardımcı fonksiyonlar
+├── lib/              # Kütüphane konfigürasyonları
+└── providers/        # React providers
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📜 Geliştirme Komutları
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run dev          # Geliştirme sunucusu
+npm run build        # Production build
+npm run lint         # ESLint kontrolü
+npm run type-check   # TypeScript kontrolü
+npm run format       # Prettier ile formatlama
+npm run validate     # Tüm kontroller (type + lint + format)
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🌿 Branch Stratejisi
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Branch | Açıklama |
+|--------|----------|
+| `main` | Production (korumalı) |
+| `develop` | Entegrasyon branch |
+| `feature/phase-X-name` | Feature branch'leri |
+
+---
+
+## 📊 Geliştirme Fazları
+
+- ✅ **Phase 1** — Project Setup
+- 🔄 **Phase 2** — Design System
+- ⏳ **Phase 3** — Reusable Components
+- ⏳ **Phase 4** — Landing Page
+- ⏳ **Phase 5** — Authentication
+- ⏳ **Phase 6** — Customer Dashboard
+- ⏳ **Phase 7** — Business Dashboard
+- ⏳ **Phase 8** — Admin Dashboard
+- ⏳ **Phase 9** — Reservation Module
+- ⏳ **Phase 10** — Notification Module
+- ⏳ **Phase 11** — Analytics
+- ⏳ **Phase 12** — Responsive Optimization
+- ⏳ **Phase 13** — Accessibility
+- ⏳ **Phase 14** — Performance Optimization
+- ⏳ **Phase 15** — Production Ready
+
+---
+
+## 📄 Lisans
+
+Bu proje özel lisanslıdır. Tüm haklar saklıdır.
