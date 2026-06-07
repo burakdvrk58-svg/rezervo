@@ -1,7 +1,11 @@
 import fs from 'fs'
 import path from 'path'
 
-const DB_FILE = path.join(process.cwd(), 'src/data/db.json')
+// On Vercel / Serverless environments, write to /tmp to avoid EROFS (Read-only file system)
+const isServerless = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1'
+const DB_FILE = isServerless
+  ? path.join('/tmp', 'db.json')
+  : path.join(process.cwd(), 'src/data/db.json')
 
 // Helper to ensure database file exists with initial mock data
 function ensureDb() {
