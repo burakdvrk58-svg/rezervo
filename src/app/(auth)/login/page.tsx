@@ -46,11 +46,11 @@ export default function LoginPage() {
     const trimmedPassword = password.trim()
     let isShortcut = false
 
-    if (trimmedPassword === 'customer123' || trimmedPassword === 'musteri123') {
+    if (trimmedPassword === 'customer123' || trimmedPassword === 'musteri123' || trimmedPassword === 'ogrenci123') {
       targetEmail = 'customer@rezervo.com'
       setEmail('customer@rezervo.com')
       isShortcut = true
-    } else if (trimmedPassword === 'business123' || trimmedPassword === 'isletme123') {
+    } else if (trimmedPassword === 'business123' || trimmedPassword === 'isletme123' || trimmedPassword === 'akademisyen123') {
       targetEmail = 'business@rezervo.com'
       setEmail('business@rezervo.com')
       isShortcut = true
@@ -297,7 +297,7 @@ export default function LoginPage() {
           <div className="mt-2.5 space-y-2 text-[11px] text-slate-500 font-semibold">
             <div className="flex flex-col gap-1 bg-white rounded-lg p-2 border border-slate-100">
               <div className="flex justify-between items-center">
-                <span>👤 Müşteri Girişi:</span>
+                <span>🎓 Öğrenci Girişi:</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -316,7 +316,7 @@ export default function LoginPage() {
             </div>
             <div className="flex flex-col gap-1 bg-white rounded-lg p-2 border border-slate-100">
               <div className="flex justify-between items-center">
-                <span>🏢 İşletme Girişi:</span>
+                <span>🔬 Akademisyen Girişi:</span>
                 <button
                   type="button"
                   onClick={() => {

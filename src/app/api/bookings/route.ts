@@ -32,10 +32,9 @@ export async function POST(request: Request) {
     const body = await request.json()
     const db = readDb()
 
-    // Determine default status: school portals are auto-approved, others are pending
-    const isSchool = body.category === 'library' || body.category === 'teacher'
-    const status = isSchool ? 'Onaylandı' : 'Beklemede'
-    const statusColor = isSchool 
+    // Determine default status: library spaces are auto-approved, academician advising starts as pending (Beklemede)
+    const status = body.category === 'library' ? 'Onaylandı' : 'Beklemede'
+    const statusColor = status === 'Onaylandı' 
       ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
       : 'text-amber-700 bg-amber-50 border-amber-100'
 

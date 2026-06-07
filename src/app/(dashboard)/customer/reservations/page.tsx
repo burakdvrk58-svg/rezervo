@@ -3,84 +3,58 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Building2,
-  Plane,
-  Car,
-  Ticket,
-  MapPin,
-  Calendar,
   Layers,
   Info,
   QrCode,
   XCircle,
   CheckCircle2,
-  GraduationCap
+  GraduationCap,
+  MapPin,
+  Calendar,
+  Clock,
+  AlertCircle
 } from 'lucide-react'
 
 const TABS = [
-  { id: 'all', label: 'Tümü', icon: Layers },
-  { id: 'otel', label: 'Oteller', icon: Building2 },
-  { id: 'ucak', label: 'Uçuşlar', icon: Plane },
-  { id: 'arac', label: 'Araç Kiralama', icon: Car },
-  { id: 'etkinlik', label: 'Etkinlikler', icon: Ticket },
-  { id: 'okul', label: 'Okul', icon: GraduationCap },
+  { id: 'all', label: 'Tüm Görüşmeler', icon: Layers },
+  { id: 'Onaylandı', label: 'Onaylananlar', icon: CheckCircle2 },
+  { id: 'Beklemede', label: 'Bekleyenler', icon: Clock },
+  { id: 'İptal Edildi', label: 'İptal Edilenler', icon: XCircle },
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
-
-
-const mapCategoryToType = (category: string): string => {
-  if (category === 'hotel') return 'otel'
-  if (category === 'flight') return 'ucak'
-  if (category === 'car') return 'arac'
-  if (category === 'event') return 'etkinlik'
-  if (category === 'teacher' || category === 'library') return 'okul'
-  return category
-}
 
 export default function ReservationsPage() {
   const [activeTab, setActiveTab] = useState<TabId>('all')
   const [showQrModal, setShowQrModal] = useState<string | null>(null)
   const [cancelTarget, setCancelTarget] = useState<string | null>(null)
+  
   const [list, setList] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
   const userName = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_name') || 'Ahmet Yılmaz') : 'Ahmet Yılmaz'
 
-  useEffect(() => {
-    document.title = 'Rezervasyonlarım | Rezervo'
-    
-    async function fetchBookings() {
-      try {
-        const userId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-customer') : 'u-customer'
-        const res = await fetch(`/api/bookings?userId=${userId}`)
-        if (!res.ok) throw new Error('Rezervasyonlar yüklenemedi.')
-        const data = await res.json()
-        const mappedData = data.map((b: any) => ({
-          id: b.id,
-          type: mapCategoryToType(b.category),
-          title: b.title,
-          subtitle: b.subtitle,
-          dateRange: `${b.date} • ${b.time}`,
-          price: b.price,
-          status: b.status,
-          statusColor: b.statusColor || (b.status === 'Onaylandı' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-50 border-slate-200'),
-          details: b.details,
-          image: b.image,
-        }))
-        setList(mappedData)
-      } catch (err) {
-        setError('Rezervasyonlar yüklenirken bir hata oluştu.')
-      } finally {
-        setIsLoading(false)
-      }
+  async function fetchBookings() {
+    try {
+      const userId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-student') : 'u-student'
+      const res = await fetch(`/api/bookings?userId=${userId}`)
+      if (!res.ok) throw new Error('Randevular yüklenemedi.')
+      const data = await res.json()
+      setList(data)
+    } catch (err) {
+      setError('Görüşme kayıtları yüklenirken bir hata oluştu.')
+    } finally {
+      setIsLoading(false)
     }
+  }
 
+  useEffect(() => {
+    document.title = 'Görüşmelerim | Rezervo'
     fetchBookings()
   }, [])
 
-  const filteredList = list.filter((item) => activeTab === 'all' || item.type === activeTab)
+  const filteredList = list.filter((item) => activeTab === 'all' || item.status === activeTab)
 
   const handleCancelReservation = async (id: string) => {
     try {
@@ -89,23 +63,16 @@ export default function ReservationsPage() {
       })
       if (!res.ok) throw new Error('İptal işlemi başarısız.')
       
-      setList((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                status: 'İptal Edildi',
-                statusColor: 'text-slate-500 bg-slate-50 border-slate-200',
-              }
-            : item
-        )
-      )
+      // Re-fetch to sync
+      await fetchBookings()
     } catch (err) {
-      alert('Rezervasyon iptal edilirken bir hata oluştu.')
+      alert('Randevu iptal edilirken bir hata oluştu.')
     } finally {
       setCancelTarget(null)
     }
   }
+
+  const selectedQrBooking = list.find((b) => b.id === showQrModal)
 
   return (
     <div className="space-y-6">
@@ -114,10 +81,10 @@ export default function ReservationsPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
-            Rezervasyonlarım
+            Akademik Görüşmelerim
           </h1>
           <p className="text-sm text-slate-500">
-            Mevcut, geçmiş ve iptal edilen rezervasyonlarınızın listesi.
+            Akademisyenlerle yaptığınız veya yapacağınız randevulu danışmanlık görüşmeleri.
           </p>
         </div>
       </div>
@@ -172,61 +139,73 @@ export default function ReservationsPage() {
                   className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row md:items-center"
                 >
                   {/* Thumbnail */}
-                  <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 md:h-24 md:w-36">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100 mx-auto md:mx-0">
                     <img
                       src={res.image}
-                      alt={res.title}
+                      alt={res.academicianName}
                       className="h-full w-full object-cover"
                     />
                   </div>
 
                   {/* Core Details */}
-                  <div className="flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                      <h3 className="text-base font-extrabold text-slate-900 sm:text-lg">{res.title}</h3>
-                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${res.statusColor}`}>
-                        {res.status === 'Onaylandı' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+                  <div className="flex-1 space-y-1 text-center md:text-left">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-1.5">
+                      <h3 className="text-base font-extrabold text-slate-900 sm:text-lg">
+                        {res.title}
+                      </h3>
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        res.status === 'Onaylandı'
+                          ? 'text-emerald-700 bg-emerald-50 border-emerald-100'
+                          : res.status === 'Beklemede'
+                          ? 'text-amber-700 bg-amber-50 border-amber-100'
+                          : 'text-slate-500 bg-slate-50 border-slate-200'
+                      }`}>
+                        {res.status === 'Onaylandı' ? (
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        ) : res.status === 'Beklemede' ? (
+                          <AlertCircle className="h-3.5 w-3.5" />
+                        ) : (
+                          <XCircle className="h-3.5 w-3.5" />
+                        )}
                         {res.status}
                       </span>
                     </div>
 
-                    <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                    <p className="flex items-center justify-center md:justify-start gap-1.5 text-xs font-medium text-slate-500">
                       <MapPin className="h-3.5 w-3.5 text-slate-400" />
                       {res.subtitle}
                     </p>
 
-                    <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <p className="flex items-center justify-center md:justify-start gap-1.5 text-xs text-slate-400">
                       <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                      Tarih: <span className="font-semibold text-slate-700">{res.dateRange}</span>
+                      Tarih: <span className="font-semibold text-slate-700">{res.date}</span>
+                      <span className="text-slate-300">•</span>
+                      <Clock className="h-3.5 w-3.5 text-slate-400" />
+                      Saat Slotu: <span className="font-bold text-primary">{res.time}</span>
                     </p>
 
-                    <p className="flex items-start gap-1.5 text-xs leading-normal text-slate-400">
-                      <Info className="h-3.5 w-3.5 shrink-0 text-slate-400 mt-0.5" />
+                    <p className="flex items-center justify-center md:justify-start gap-1.5 text-xs leading-normal text-slate-400">
+                      <Info className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                       <span>{res.details}</span>
                     </p>
                   </div>
 
-                  {/* Price & Action Actions */}
-                  <div className="flex flex-row items-center justify-between border-t border-slate-100 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0 gap-3">
-                    <div className="text-left md:text-right">
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tutar</p>
-                      <p className="text-xl font-black text-slate-900">{res.price}</p>
-                    </div>
-
+                  {/* Actions */}
+                  <div className="flex flex-row items-center justify-center border-t border-slate-100 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0 gap-3 shrink-0">
                     {(res.status === 'Onaylandı' || res.status === 'Beklemede') && (
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setShowQrModal(res.id)}
-                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-                          title="Bilet Barkodu / QR"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 cursor-pointer"
+                          title="Giriş Geçiş Kartı / QR"
                         >
                           <QrCode className="h-4.5 w-4.5 text-slate-500" />
-                          <span className="hidden sm:inline">Bilet Gör</span>
+                          <span className="hidden sm:inline">QR Kod</span>
                         </button>
                         
                         <button
                           onClick={() => setCancelTarget(res.id)}
-                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 shadow-sm transition-colors hover:bg-red-50"
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 shadow-sm transition-colors hover:bg-red-50 cursor-pointer"
                         >
                           İptal Et
                         </button>
@@ -239,18 +218,18 @@ export default function ReservationsPage() {
 
             {filteredList.length === 0 && (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center text-slate-500">
-                <Layers className="mx-auto h-12 w-12 text-slate-300 mb-3" />
-                <h3 className="text-base font-bold text-slate-700">Rezervasyon Bulunamadı</h3>
-                <p className="text-xs text-slate-400 mt-1">Seçtiğiniz filtreye uygun aktif veya geçmiş rezervasyon kaydı bulunmuyor.</p>
+                <GraduationCap className="mx-auto h-12 w-12 text-slate-300 mb-3" />
+                <h3 className="text-base font-bold text-slate-700">Görüşme Bulunmuyor</h3>
+                <p className="text-xs text-slate-400 mt-1">Seçtiğiniz filtreye uygun danışmanlık görüşmesi kaydı bulunmuyor.</p>
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* ── QR Code Ticket Modal ── */}
+      {/* ── QR Code Advisor Ticket Modal ── */}
       <AnimatePresence>
-        {showQrModal && (
+        {showQrModal && selectedQrBooking && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
@@ -266,20 +245,18 @@ export default function ReservationsPage() {
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl text-center"
             >
-              <h3 className="text-lg font-bold text-slate-900">Dijital Rezervasyon Biletiniz</h3>
-              <p className="text-xs text-slate-500 mt-1">Giriş esnasında bu QR kodunu görevliye okutun.</p>
+              <h3 className="text-lg font-bold text-slate-900">Görüşme Giriş Kartı</h3>
+              <p className="text-xs text-slate-500 mt-1">Ofis girişinde veya bina güvenliğinde bu kodu görevliye gösterin.</p>
               
               {/* QR Render mock */}
               <div className="mx-auto my-6 flex h-48 w-48 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-inner">
                 <svg className="h-full w-full text-slate-800" viewBox="0 0 100 100" fill="currentColor">
-                  {/* Outer boundaries */}
                   <rect x="10" y="10" width="20" height="20" />
                   <rect x="15" y="15" width="10" height="10" fill="white" />
                   <rect x="70" y="10" width="20" height="20" />
                   <rect x="75" y="15" width="10" height="10" fill="white" />
                   <rect x="10" y="70" width="20" height="20" />
                   <rect x="15" y="75" width="10" height="10" fill="white" />
-                  {/* Randomized code squares */}
                   <rect x="40" y="10" width="10" height="10" />
                   <rect x="50" y="20" width="10" height="10" />
                   <rect x="40" y="40" width="20" height="20" />
@@ -290,9 +267,11 @@ export default function ReservationsPage() {
                 </svg>
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-3 text-left text-xs font-semibold text-slate-600">
-                <p>Kod: <span className="font-bold text-slate-900">RZV-{showQrModal.toUpperCase()}</span></p>
-                <p className="mt-1">Kullanıcı: <span className="font-bold text-slate-900">{userName}</span></p>
+              <div className="rounded-xl bg-slate-50 p-3 text-left text-xs font-semibold text-slate-600 space-y-1">
+                <p>Onay Kodu: <span className="font-bold text-slate-900">{selectedQrBooking.id}</span></p>
+                <p>Danışman: <span className="font-bold text-slate-900">{selectedQrBooking.academicianName}</span></p>
+                <p>Öğrenci: <span className="font-bold text-slate-900">{userName} ({selectedQrBooking.studentNo})</span></p>
+                <p>Tarih & Saat: <span className="font-bold text-slate-900">{selectedQrBooking.date} • {selectedQrBooking.time}</span></p>
               </div>
 
               <button
@@ -327,9 +306,9 @@ export default function ReservationsPage() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600 mb-4">
                 <XCircle className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">İptal Etmek İstiyor musunuz?</h3>
+              <h3 className="text-lg font-bold text-slate-900">Randevuyu İptal Et?</h3>
               <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                Bu rezervasyonu iptal ettiğinizde işleminiz geri alınamaz. Kural şartlarına göre ücret iadesi yapılacaktır.
+                Bu akademik danışmanlık randevusunu iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
               </p>
 
               <div className="mt-5 flex gap-3">

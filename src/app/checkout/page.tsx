@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,60 +8,101 @@ import { Navbar } from '@/components/common/Navbar'
 import { Footer } from '@/components/common/Footer'
 import {
   ShieldCheck,
-  CreditCard,
   Calendar,
   MapPin,
   Users,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Clock,
+  BookOpen
 } from 'lucide-react'
+
+const TOPICS = [
+  'Tez Danışmanlığı',
+  'Sınav / Not İtirazı',
+  'Proje Danışmanlığı',
+  'Ders Kaydı / Müfredat Onayı',
+  'Birebir Soru Çözümü & Destek',
+  'Kariyer & Staj Danışmanlığı'
+]
 
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const hotelName = searchParams.get('hotel') || 'Grand Deluxe Resort & Spa'
-  const hotelPrice = searchParams.get('price') || '3.450 TL'
-  const isSchool = searchParams.get('type') === 'okul'
+  const academicianId = searchParams.get('academicianId') || 'acad-1'
+  const universityParam = searchParams.get('university') || 'Boğaziçi Üniversitesi'
 
-  // Personal Info State
+  // Data states
+  const [academician, setAcademician] = useState<any>(null)
+  const [existingBookings, setExistingBookings] = useState<any[]>([])
+  const [isLoadingData, setIsLoadingData] = useState(true)
+
+  // Personal Info State (populated from localStorage)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [tcNo, setTcNo] = useState('')
-
-  // School Specific State
   const [studentNo, setStudentNo] = useState('')
-  const [studentClass, setStudentClass] = useState('')
-
-  // Payment State
-  const [cardHolder, setCardHolder] = useState('')
-  const [cardNumber, setCardNumber] = useState('')
-  const [expiry, setExpiry] = useState('')
-  const [cvc, setCvc] = useState('')
+  const [selectedTopic, setSelectedTopic] = useState(TOPICS[0])
+  const [notes, setNotes] = useState('')
+  
+  // Slot selection state
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState('08 Haziran Pazartesi') // Default date
 
   // Form states
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [createdBookingId, setCreatedBookingId] = useState('')
 
-  // Card formatting
-  const handleCardNumberChange = (val: string) => {
-    const clean = val.replace(/\D/g, '')
-    const formatted = clean.match(/.{1,4}/g)?.join(' ') || clean
-    setCardNumber(formatted.substring(0, 19))
-  }
+  useEffect(() => {
+    async function loadBookingData() {
+      try {
+        // Fetch academician details
+        const acadRes = await fetch('/api/academicians')
+        if (acadRes.ok) {
+          const data = await acadRes.json()
+          const found = data.academicians.find((a: any) => a.id === academicianId)
+          setAcademician(found)
+        }
 
-  const handleExpiryChange = (val: string) => {
-    const clean = val.replace(/\D/g, '')
-    if (clean.length <= 2) {
-      setExpiry(clean)
-    } else {
-      setExpiry(`${clean.slice(0, 2)}/${clean.slice(2, 4)}`)
+        // Fetch existing bookings to block already-taken slots
+        const bookingsRes = await fetch('/api/bookings')
+        if (bookingsRes.ok) {
+          const bookingsData = await bookingsRes.json()
+          setExistingBookings(bookingsData)
+        }
+
+        // Load student session defaults
+        if (typeof window !== 'undefined') {
+          const nameParts = (localStorage.getItem('rezervo_user_name') || 'Ahmet Yılmaz').split(' ')
+          setFirstName(nameParts[0] || '')
+          setLastName(nameParts.slice(1).join(' ') || '')
+          setEmail(localStorage.getItem('rezervo_user_email') || 'customer@rezervo.com')
+          setStudentNo('1420') // Mock student ID
+        }
+      } catch (err) {
+        console.error('Veri yükleme hatası:', err)
+      } finally {
+        setIsLoadingData(false)
+      }
     }
-  }
+
+    loadBookingData()
+  }, [academicianId])
+
+  // Get slots that are already booked for this academician and date
+  const bookedSlots = existingBookings
+    .filter(
+      (b: any) =>
+        b.academicianId === academicianId &&
+        b.date === selectedDate &&
+        b.status !== 'İptal Edildi' &&
+        b.status !== 'Reddedildi'
+    )
+    .map((b: any) => b.time)
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
@@ -73,17 +114,8 @@ function CheckoutContent() {
       newErrors.email = 'Geçerli bir e-posta girin.'
     }
     if (!phone.trim()) newErrors.phone = 'Telefon gereklidir.'
-
-    if (isSchool) {
-      if (!studentNo.trim()) newErrors.studentNo = 'Öğrenci numarası gereklidir.'
-      if (!studentClass.trim()) newErrors.studentClass = 'Sınıf bilgisi gereklidir.'
-    } else {
-      if (!tcNo.trim() || tcNo.length !== 11) newErrors.tcNo = '11 haneli T.C. No girin.'
-      if (!cardHolder.trim()) newErrors.cardHolder = 'Kart sahibi alanı gereklidir.'
-      if (!cardNumber || cardNumber.length < 19) newErrors.cardNumber = 'Geçerli kart numarası girin.'
-      if (!expiry || expiry.length < 5) newErrors.expiry = 'Geçerli tarih girin (AA/YY).'
-      if (!cvc || cvc.length < 3) newErrors.cvc = '3 haneli CVC girin.'
-    }
+    if (!studentNo.trim()) newErrors.studentNo = 'Öğrenci numarası gereklidir.'
+    if (!selectedSlot) newErrors.slot = 'Lütfen görüşmek istediğiniz saat slotunu seçin.'
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -92,26 +124,29 @@ function CheckoutContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
-      setIsLoading(true)
+      setIsLoadingSubmit(true)
       try {
-        const category = isSchool
-          ? (hotelName.toLowerCase().includes('kütüphane') || hotelName.toLowerCase().includes('oda') ? 'library' : 'teacher')
-          : 'hotel'
+        const studentId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-student') : 'u-student'
+        const category = academician?.department?.toLowerCase()?.includes('kütüphane') ? 'library' : 'teacher'
 
         const bookingData = {
-          userId: typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-customer') : 'u-customer',
+          userId: studentId,
+          studentName: `${firstName} ${lastName}`,
+          studentNo: studentNo,
+          studentEmail: email,
           category,
-          title: hotelName,
-          subtitle: isSchool ? 'Kampüs Binası' : 'Lara, Antalya',
-          date: isSchool ? '08 Haziran Pazartesi' : '12 - 19 Haziran 2026',
-          time: isSchool ? 'Süre: 15-20 Dakika' : '7 Gece',
-          details: isSchool ? 'Soru Çözümü & Grup Çalışması' : 'Standart Oda • 2 Yetişkin, 1 Çocuk',
-          image: category === 'library'
-            ? 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=300&h=200&fit=crop'
-            : category === 'teacher'
-            ? 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=300&h=200&fit=crop'
-            : 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=300&h=200&fit=crop',
-          price: isSchool ? 'Ücretsiz' : hotelPrice
+          academicianId: academician?.id,
+          academicianName: academician?.name,
+          universityId: academician?.universityId,
+          universityName: universityParam,
+          title: `${academician?.name || 'Akademisyen'} ile Görüşme`,
+          subtitle: universityParam,
+          date: selectedDate,
+          time: selectedSlot,
+          details: `${selectedTopic} • Öğrenci No: ${studentNo}`,
+          notes: notes,
+          image: academician?.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces',
+          price: 'Ücretsiz'
         }
 
         const res = await fetch('/api/bookings', {
@@ -121,18 +156,41 @@ function CheckoutContent() {
         })
 
         if (!res.ok) {
-          throw new Error('Rezervasyon kaydedilemedi.')
+          throw new Error('Randevu oluşturulamadı.')
         }
 
         const data = await res.json()
         setCreatedBookingId(data.id)
         setShowSuccessModal(true)
       } catch (err) {
-        setErrors((prev) => ({ ...prev, submit: 'Rezervasyon tamamlanırken bir hata oluştu. Lütfen tekrar deneyin.' }))
+        setErrors((prev) => ({ ...prev, submit: 'Randevu onaylanırken hata oluştu. Lütfen tekrar deneyin.' }))
       } finally {
-        setIsLoading(false)
+        setIsLoadingSubmit(false)
       }
     }
+  }
+
+  if (isLoadingData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!academician) {
+    return (
+      <div className="flex min-h-screen flex-col bg-slate-50">
+        <Navbar />
+        <main className="flex-1 py-12 text-center">
+          <h2 className="text-xl font-bold text-slate-700">Akademisyen bulunamadı.</h2>
+          <Link href="/search" className="mt-4 inline-block text-primary font-bold hover:underline">
+            Geri dön ve tekrar ara
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -142,36 +200,107 @@ function CheckoutContent() {
       <main className="flex-1 py-8">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           
-          {/* Back link */}
+          {/* Back Link */}
           <div className="mb-6">
             <Link
-              href={isSchool ? '/search?type=okul' : '/search'}
+              href="/search"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              Sonuçlara Geri Dön
+              Akademisyen Listesine Geri Dön
             </Link>
           </div>
 
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl mb-8">
-            {isSchool ? 'Okul Randevu Onay Ekranı' : 'Rezervasyon Ödeme Sayfası'}
+            Akademik Danışmanlık Randevu Formu
           </h1>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             
-            {/* Left 2 Cols: Checkout Form details */}
+            {/* Left 2 Cols: Form details */}
             <div className="space-y-6 lg:col-span-2">
               <form onSubmit={handleSubmit} className="space-y-6">
                 
-                {/* Personal details */}
+                {/* 1. Date & 15-Minute Slot Selection */}
                 <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-                  <h2 className="text-base font-bold text-slate-900">
-                    {isSchool ? '1. Veli / İletişim Bilgileri' : '1. Misafir Bilgileri'}
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                    <Clock className="h-5 w-5 text-primary" />
+                    1. Görüşme Tarihi & Saat Dilimi Seçimi
+                  </h2>
+
+                  {/* Simple Date Selector Tabs */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: '08 Haziran Pazartesi', label: '08 Haz Pazartesi' },
+                      { id: '10 Haziran Çarşamba', label: '10 Haz Çarşamba' },
+                    ].map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(d.id)
+                          setSelectedSlot(null) // Reset slot on date change
+                        }}
+                        className={`rounded-xl border p-3 text-center text-xs font-bold transition-all ${
+                          selectedDate === d.id
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Slot Selection Grid */}
+                  <div className="space-y-2 pt-2">
+                    <label className="text-[11px] font-semibold text-slate-500">
+                      Müsait Görüşme Saatleri (15 Dakika)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {academician.slots?.map((slot: string) => {
+                        const isBooked = bookedSlots.includes(slot)
+                        const isSelected = selectedSlot === slot
+
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            disabled={isBooked}
+                            onClick={() => {
+                              setSelectedSlot(slot)
+                              if (errors.slot) setErrors((prev) => ({ ...prev, slot: '' }))
+                            }}
+                            className={`rounded-xl border py-2.5 px-2 text-center text-[11px] font-bold transition-all ${
+                              isBooked
+                                ? 'bg-slate-50 border-slate-100 text-slate-300 cursor-not-allowed line-through'
+                                : isSelected
+                                ? 'border-primary bg-primary text-white shadow-sm'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+                            }`}
+                          >
+                            {slot}
+                            {isBooked && ' (Dolu)'}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {errors.slot && (
+                      <p className="text-xs text-red-500 font-bold mt-1">{errors.slot}</p>
+                    )}
+                  </div>
+                </div>
+                
+                {/* 2. Personal student info */}
+                <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    2. Öğrenci & Görüşme Konusu Bilgileri
                   </h2>
                   
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-slate-500">Ad</label>
+                      <label className="text-[11px] font-semibold text-slate-500">Öğrenci Adı</label>
                       <input
                         type="text"
                         placeholder="Ahmet"
@@ -182,7 +311,7 @@ function CheckoutContent() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-slate-500">Soyad</label>
+                      <label className="text-[11px] font-semibold text-slate-500">Öğrenci Soyadı</label>
                       <input
                         type="text"
                         placeholder="Yılmaz"
@@ -195,7 +324,7 @@ function CheckoutContent() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-1.5 sm:col-span-2">
-                      <label className="text-[11px] font-semibold text-slate-500">E-posta</label>
+                      <label className="text-[11px] font-semibold text-slate-500">E-posta Adresi</label>
                       <input
                         type="email"
                         placeholder="ahmet.yilmaz@gmail.com"
@@ -217,120 +346,57 @@ function CheckoutContent() {
                     </div>
                   </div>
 
-                  {!isSchool && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-slate-500">T.C. Kimlik No</label>
+                      <label className="text-[11px] font-semibold text-slate-500">Öğrenci Numarası</label>
                       <input
                         type="text"
-                        placeholder="11 Haneli T.C. No"
-                        value={tcNo}
-                        onChange={(e) => setTcNo(e.target.value.replace(/\D/g, '').slice(0, 11))}
-                        className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.tcNo ? 'border-red-500' : 'border-slate-200'}`}
+                        placeholder="Örn: 1420"
+                        value={studentNo}
+                        onChange={(e) => setStudentNo(e.target.value)}
+                        className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.studentNo ? 'border-red-500' : 'border-slate-200'}`}
                       />
                     </div>
-                  )}
+
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="text-[11px] font-semibold text-slate-500">Görüşme Konusu</label>
+                      <select
+                        value={selectedTopic}
+                        onChange={(e) => setSelectedTopic(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10"
+                      >
+                        {TOPICS.map((topic) => (
+                          <option key={topic} value={topic}>{topic}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-slate-500">Görüşme Notları / Açıklama</label>
+                    <textarea
+                      placeholder="Görüşme öncesi akademisyene iletmek istediğiniz detayları buraya yazın..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows={3}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10"
+                    />
+                  </div>
                 </div>
 
-                {/* School Specific Info */}
-                {isSchool && (
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-                    <h2 className="text-base font-bold text-slate-900">2. Öğrenci Bilgileri</h2>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-slate-500">Öğrenci Numarası</label>
-                        <input
-                          type="text"
-                          placeholder="Örn: 1420"
-                          value={studentNo}
-                          onChange={(e) => setStudentNo(e.target.value)}
-                          className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.studentNo ? 'border-red-500' : 'border-slate-200'}`}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-slate-500">Sınıfı & Şubesi</label>
-                        <input
-                          type="text"
-                          placeholder="Örn: 11-A"
-                          value={studentClass}
-                          onChange={(e) => setStudentClass(e.target.value)}
-                          className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.studentClass ? 'border-red-500' : 'border-slate-200'}`}
-                        />
-                      </div>
-                    </div>
+                <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-6 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                    <h3 className="text-sm font-bold text-emerald-800">Tamamen Ücretsiz Hizmet</h3>
                   </div>
-                )}
-
-                {/* Payment details / School Alert info */}
-                {isSchool ? (
-                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-6 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                      <h3 className="text-sm font-bold text-emerald-800">Ücretsiz Kampüs Hizmeti</h3>
-                    </div>
-                    <p className="text-xs text-emerald-700 leading-relaxed">
-                      Bu işlem kütüphane grup çalışma odası rezervasyonu ya da veli-öğretmen bülten görüşmesi kapsamında olup tamamen ücretsizdir. Herhangi bir ödeme veya kart bilgisi talep edilmemektedir.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-base font-bold text-slate-900">2. Ödeme Bilgileri</h2>
-                      <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-slate-500">Kart Üzerindeki İsim</label>
-                      <input
-                        type="text"
-                        placeholder="AHMET YILMAZ"
-                        value={cardHolder}
-                        onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
-                        className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.cardHolder ? 'border-red-500' : 'border-slate-200'}`}
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-slate-500">Kart Numarası</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="0000 0000 0000 0000"
-                          value={cardNumber}
-                          onChange={(e) => handleCardNumberChange(e.target.value)}
-                          className={`w-full rounded-xl border bg-slate-50/50 py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.cardNumber ? 'border-red-500' : 'border-slate-200'}`}
-                        />
-                        <CreditCard className="absolute left-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-slate-500">Son Kullanma Tarihi</label>
-                        <input
-                          type="text"
-                          placeholder="AA/YY"
-                          value={expiry}
-                          onChange={(e) => handleExpiryChange(e.target.value)}
-                          className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.expiry ? 'border-red-500' : 'border-slate-200'}`}
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-slate-500">CVC</label>
-                        <input
-                          type="text"
-                          placeholder="123"
-                          value={cvc}
-                          onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                          className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.cvc ? 'border-red-500' : 'border-slate-200'}`}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  <p className="text-xs text-emerald-700 leading-relaxed">
+                    Bu sistem üniversite içi akademik danışmanlık hizmeti kapsamında olup öğrenciler için tamamen ücretsizdir. Herhangi bir kart bilgisi veya ödeme talep edilmemektedir.
+                  </p>
+                </div>
 
                 {errors.submit && (
-                  <p className="text-xs text-red-500 font-bold text-center mb-3">
+                  <p className="text-xs text-red-500 font-bold text-center">
                     {errors.submit}
                   </p>
                 )}
@@ -339,15 +405,15 @@ function CheckoutContent() {
                 <motion.button
                   id="checkout-submit"
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoadingSubmit}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 disabled:opacity-70"
                 >
-                  {isLoading ? (
+                  {isLoadingSubmit ? (
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   ) : (
-                    <span>{isSchool ? 'Rezervasyonu Onayla' : 'Ödemeyi Tamamla ve Rezervasyonu Bitir'}</span>
+                    <span>Danışmanlık Randevusunu Tamamla</span>
                   )}
                   <span className="absolute inset-0 -translate-x-full skew-x-12 bg-white/15 transition-transform duration-700 group-hover:translate-x-full" />
                 </motion.button>
@@ -361,35 +427,42 @@ function CheckoutContent() {
                 <h3 className="text-sm font-bold text-slate-900">Randevu Özeti</h3>
                 
                 {/* Details list */}
-                <div className="text-xs leading-relaxed text-slate-600 space-y-2 border-b border-slate-100 pb-4">
-                  <p className="font-extrabold text-slate-800 text-sm">{hotelName}</p>
+                <div className="text-xs leading-relaxed text-slate-600 space-y-2.5 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 overflow-hidden rounded-lg bg-slate-100 shrink-0">
+                      <img src={academician.avatar} alt={academician.name} className="h-full w-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-slate-800 text-sm">{academician.name}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{academician.department}</p>
+                    </div>
+                  </div>
                   <p className="flex items-center gap-1.5">
                     <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                    {isSchool ? 'Kampüs Binası' : 'Lara, Antalya'}
+                    {universityParam}
                   </p>
                   <p className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                    {isSchool ? '08 Haziran Pazartesi' : '12 - 19 Haziran (7 Gece)'}
+                    {selectedDate}
+                  </p>
+                  <p className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                    Saat: <span className="font-bold text-slate-800">{selectedSlot || 'Seçilmedi'}</span>
                   </p>
                   <p className="flex items-center gap-1.5">
                     <Users className="h-3.5 w-3.5 text-slate-400" />
-                    {isSchool ? 'Süre: 15-20 Dakika' : '2 Yetişkin, 1 Çocuk'}
+                    Süre: 15 Dakika (Birebir Danışmanlık)
                   </p>
                 </div>
 
-                {/* Price break */}
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">{isSchool ? 'Eğitim Bedeli' : 'Konaklama Bedeli'}</span>
-                    <span className="font-semibold text-slate-800">{isSchool ? 'Ücretsiz' : hotelPrice}</span>
+                    <span className="text-slate-400">Danışmanlık Bedeli</span>
+                    <span className="font-bold text-emerald-600">Ücretsiz</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Vergiler & Harçlar</span>
-                    <span className="font-semibold text-slate-800">Dahil</span>
-                  </div>
-                  <div className="flex justify-between border-t border-slate-100 pt-3 text-sm font-extrabold text-slate-950">
+                  <div className="flex justify-between border-t border-slate-100 pt-3 text-sm font-extrabold text-slate-905">
                     <span>Toplam Tutar</span>
-                    <span>{isSchool ? '0 TL' : hotelPrice}</span>
+                    <span className="text-emerald-600">0 TL</span>
                   </div>
                 </div>
               </div>
@@ -421,24 +494,25 @@ function CheckoutContent() {
                 <CheckCircle className="h-8 w-8" />
               </div>
               
-              <h3 className="text-xl font-extrabold text-slate-950">
-                {isSchool ? 'Randevu Onaylandı!' : 'Rezervasyonunuz Alındı!'}
+              <h3 className="text-xl font-extrabold text-slate-955">
+                Randevunuz Alındı!
               </h3>
               <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                {isSchool ? 'Randevunuz sisteme işlendi. Görüşme / oda onay kodu oluşturuldu.' : 'Ödemeniz başarıyla doğrulandı. Rezervasyon detaylarınız ve barkodunuz oluşturuldu.'}
+                Akademik danışmanlık görüşme talebiniz sisteme başarıyla kaydedildi. Detaylar ve barkodunuz oluşturuldu.
               </p>
 
               <div className="my-5 rounded-2xl bg-slate-50 p-4 text-left text-xs font-semibold text-slate-600 space-y-1.5">
-                <p>İşlem: <span className="font-bold text-slate-900">{hotelName}</span></p>
-                <p>Harcama Tutarı: <span className="font-bold text-slate-900">{isSchool ? '0 TL' : hotelPrice}</span></p>
-                <p>Onay Kodu: <span className="font-bold text-slate-900">{createdBookingId || 'RZV-SCHOOL7'}</span></p>
+                <p>Akademisyen: <span className="font-bold text-slate-900">{academician.name}</span></p>
+                <p>Konu: <span className="font-bold text-slate-900">{selectedTopic}</span></p>
+                <p>Tarih & Saat: <span className="font-bold text-slate-900">{selectedDate} ({selectedSlot})</span></p>
+                <p>Onay Kodu: <span className="font-bold text-slate-900">{createdBookingId}</span></p>
               </div>
 
               <button
                 onClick={() => router.push('/customer/reservations')}
                 className="w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                Rezervasyonlarıma Git
+                Görüşmelerime Git
               </button>
             </motion.div>
           </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -15,16 +15,12 @@ import {
   X,
   User,
   LogOut,
-  CreditCard,
   ChevronRight,
   ClipboardList,
-  Building2,
   BarChart3,
   Users,
-  ShieldCheck,
   CheckCheck,
-  MessageSquare,
-  GraduationCap
+  MessageSquare
 } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -32,6 +28,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  
+  const [userName, setUserName] = useState('')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserName(localStorage.getItem('rezervo_user_name') || '')
+    }
+  }, [])
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -42,9 +46,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Notification local state
   const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Rezervasyon Onaylandı', desc: 'Grand Deluxe Resort rezervasyonunuz tesis tarafından onaylandı.', time: '1s önce', unread: true },
-    { id: 2, title: 'Yeni Mesaj', desc: 'Destek ekibi veli görüşme talebinize yanıt yazdı.', time: '3s önce', unread: true },
-    { id: 3, title: 'Ödeme Onayı', desc: 'Uçak biletiniz için ödeme başarıyla gerçekleşti.', time: 'Dün', unread: false },
+    { id: 1, title: 'Randevu Onaylandı', desc: 'Prof. Dr. Albert Ali Salah randevunuzu onayladı.', time: '1s önce', unread: true },
+    { id: 2, title: 'Yeni İstek', desc: 'Bir öğrenci görüşme talebi gönderdi.', time: '3s önce', unread: true },
+    { id: 3, title: 'Güncelleme', desc: 'Randevu takviminiz güncellendi.', time: 'Dün', unread: false },
   ])
 
   const unreadCount = notifications.filter((n) => n.unread).length
@@ -57,17 +61,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const getRoleInfo = () => {
     if (pathname?.startsWith('/business')) {
       return {
-        roleLabel: 'İşletme Paneli',
-        userRole: 'İşletme Sahibi',
-        userName: 'Mehmet Demir',
-        userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces',
+        roleLabel: 'Akademisyen Paneli',
+        userRole: 'Akademisyen',
+        userDisplayName: userName || 'Prof. Dr. Albert Ali Salah',
+        userAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces',
         menuItems: [
           { label: 'Genel Bakış', href: '/business', icon: LayoutDashboard },
-          { label: 'Rezervasyon İstekleri', href: '/business/requests', icon: ClipboardList },
-          { label: 'Hizmet & Oda Yönetimi', href: '/business/services', icon: Building2 },
-          { label: 'Çalışma Takvimi', href: '/business/calendar', icon: Calendar },
-          { label: 'Gelir & Analitik', href: '/business/analytics', icon: BarChart3 },
-          { label: 'İşletme Ayarları', href: '/business/settings', icon: Settings },
+          { label: 'Görüşme İstekleri', href: '/business/requests', icon: ClipboardList },
+          { label: 'Akademik Analitik', href: '/business/analytics', icon: BarChart3 },
+          { label: 'Hesap Ayarları', href: '/business/settings', icon: Settings },
         ]
       }
     }
@@ -76,14 +78,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       return {
         roleLabel: 'Yönetici Paneli',
         userRole: 'Sistem Yöneticisi',
-        userName: 'Can Ertekin',
+        userDisplayName: userName || 'Can Ertekin',
         userAvatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces',
         menuItems: [
           { label: 'Genel Bakış', href: '/admin', icon: LayoutDashboard },
           { label: 'Kullanıcı Yönetimi', href: '/admin/users', icon: Users },
-          { label: 'İşletme Yönetimi', href: '/admin/businesses', icon: Building2 },
           { label: 'Sistem Analitiği', href: '/admin/analytics', icon: BarChart3 },
-          { label: 'Sistem Günlükleri', href: '/admin/logs', icon: ShieldCheck },
           { label: 'Sistem Ayarları', href: '/admin/settings', icon: Settings },
         ]
       }
@@ -91,22 +91,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // Default to customer role
     return {
-      roleLabel: 'Müşteri Paneli',
-      userRole: 'Müşteri',
-      userName: 'Ahmet Yılmaz',
+      roleLabel: 'Öğrenci Paneli',
+      userRole: 'Öğrenci',
+      userDisplayName: userName || 'Ahmet Yılmaz',
       userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces',
       menuItems: [
         { label: 'Genel Bakış', href: '/customer', icon: LayoutDashboard },
-        { label: 'Rezervasyonlarım', href: '/customer/reservations', icon: Clock },
-        { label: 'Okul Paneli', href: '/customer/school', icon: GraduationCap },
-        { label: 'Takvim Planı', href: '/customer/calendar', icon: Calendar },
-        { label: 'Ödemelerim', href: '/customer/payments', icon: CreditCard },
+        { label: 'Görüşmelerim', href: '/customer/reservations', icon: Clock },
+        { label: 'Akademisyen Bul', href: '/search', icon: Search },
         { label: 'Hesap Ayarları', href: '/customer/settings', icon: Settings },
       ]
     }
   }
 
-  const { roleLabel, userRole, userName, userAvatar, menuItems } = getRoleInfo()
+  const { roleLabel, userRole, userDisplayName, userAvatar, menuItems } = getRoleInfo()
 
   return (
     <div className="flex min-h-screen bg-slate-50/50">
@@ -161,12 +159,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="relative h-9 w-9 overflow-hidden rounded-full bg-slate-200">
                 <img
                   src={userAvatar}
-                  alt={userName}
+                  alt={userDisplayName}
                   className="h-full w-full object-cover"
                 />
               </div>
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                <p className="truncate text-sm font-bold text-slate-900">{userDisplayName}</p>
                 <p className="truncate text-[11px] text-slate-500">{userRole}</p>
               </div>
               <Link
@@ -251,12 +249,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-200">
                     <img
                       src={userAvatar}
-                      alt={userName}
+                      alt={userDisplayName}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <p className="truncate text-sm font-bold text-slate-900">{userName}</p>
+                    <p className="truncate text-sm font-bold text-slate-900">{userDisplayName}</p>
                     <p className="truncate text-[11px] text-slate-500">{userRole}</p>
                   </div>
                   <Link
@@ -374,11 +372,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200">
                   <img
                     src={userAvatar}
-                    alt={userName}
+                    alt={userDisplayName}
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <span className="hidden text-sm font-semibold text-slate-700 sm:block">{userName}</span>
+                <span className="hidden text-sm font-semibold text-slate-700 sm:block">{userDisplayName}</span>
               </button>
 
               <AnimatePresence>
