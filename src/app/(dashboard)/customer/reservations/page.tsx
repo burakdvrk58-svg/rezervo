@@ -28,96 +28,83 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]['id']
 
-const RESERVATIONS = [
-  {
-    id: 'res-1',
-    type: 'otel',
-    title: 'Grand Deluxe Resort & Spa',
-    subtitle: 'Lara, Antalya',
-    dateRange: '12 - 19 Haziran 2026',
-    price: '3.450 TL',
-    status: 'Onaylandı',
-    statusColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-    details: '7 Gece • Standart Deniz Manzaralı Oda • Yarım Pansiyon • 2 Yetişkin, 1 Çocuk',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=200&h=150&fit=crop',
-  },
-  {
-    id: 'res-2',
-    type: 'ucak',
-    title: 'İstanbul (IST) - Antalya (AYT)',
-    subtitle: 'Türk Hava Yolları • TK2410',
-    dateRange: '12 Haziran 2026 • 10:30',
-    price: '850 TL',
-    status: 'Onaylandı',
-    statusColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-    details: 'Ekonomi Sınıfı • Koltuk 14A, 14B, 14C • 20kg Bagaj Hakkı',
-    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=200&h=150&fit=crop',
-  },
-  {
-    id: 'res-3',
-    type: 'arac',
-    title: 'Renault Megane (Otomatik)',
-    subtitle: 'Enterprise Rent-A-Car',
-    dateRange: '12 - 19 Haziran 2026',
-    price: '1.200 TL',
-    status: 'İptal Edildi',
-    statusColor: 'text-slate-500 bg-slate-50 border-slate-200',
-    details: 'Dizel • 7 Gün Kiralama • Antalya Havalimanı Teslim Alma/Etme',
-    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=200&h=150&fit=crop',
-  },
-  {
-    id: 'res-4',
-    type: 'etkinlik',
-    title: 'Antalya Açıkhava Konserleri: Tarkan',
-    subtitle: 'Antalya Açıkhava Tiyatrosu',
-    dateRange: '15 Haziran 2026 • 21:00',
-    price: '520 TL',
-    status: 'Onaylandı',
-    statusColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-    details: 'Protokol A Blok • Sıra 4, Koltuk 12, 13',
-    image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=200&h=150&fit=crop',
-  },
-  {
-    id: 'res-5',
-    type: 'okul',
-    title: 'Ahmet Hoca ile Veli Görüşmesi',
-    subtitle: 'Matematik Zümre Odası (Kat 2)',
-    dateRange: '08 Haziran 2026 • 09:30',
-    price: 'Ücretsiz',
-    status: 'Onaylandı',
-    statusColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-    details: 'Matematik Dersi Yazılı Sınav Değerlendirmesi • Öğrenci No: 1420',
-    image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=200&h=150&fit=crop',
-  },
-]
+
+const mapCategoryToType = (category: string): string => {
+  if (category === 'hotel') return 'otel'
+  if (category === 'flight') return 'ucak'
+  if (category === 'car') return 'arac'
+  if (category === 'event') return 'etkinlik'
+  if (category === 'teacher' || category === 'library') return 'okul'
+  return category
+}
 
 export default function ReservationsPage() {
-  useEffect(() => {
-    document.title = 'Rezervasyonlarım | Rezervo'
-  }, [])
-
   const [activeTab, setActiveTab] = useState<TabId>('all')
   const [showQrModal, setShowQrModal] = useState<string | null>(null)
   const [cancelTarget, setCancelTarget] = useState<string | null>(null)
-  
-  // Local list to allow canceling items dynamically
-  const [list, setList] = useState(RESERVATIONS)
+  const [list, setList] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const userName = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_name') || 'Ahmet Yılmaz') : 'Ahmet Yılmaz'
+
+  useEffect(() => {
+    document.title = 'Rezervasyonlarım | Rezervo'
+    
+    async function fetchBookings() {
+      try {
+        const userId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-customer') : 'u-customer'
+        const res = await fetch(`/api/bookings?userId=${userId}`)
+        if (!res.ok) throw new Error('Rezervasyonlar yüklenemedi.')
+        const data = await res.json()
+        const mappedData = data.map((b: any) => ({
+          id: b.id,
+          type: mapCategoryToType(b.category),
+          title: b.title,
+          subtitle: b.subtitle,
+          dateRange: `${b.date} • ${b.time}`,
+          price: b.price,
+          status: b.status,
+          statusColor: b.statusColor || (b.status === 'Onaylandı' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-50 border-slate-200'),
+          details: b.details,
+          image: b.image,
+        }))
+        setList(mappedData)
+      } catch (err) {
+        setError('Rezervasyonlar yüklenirken bir hata oluştu.')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [])
 
   const filteredList = list.filter((item) => activeTab === 'all' || item.type === activeTab)
 
-  const handleCancelReservation = (id: string) => {
-    setList((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: 'İptal Edildi',
-              statusColor: 'text-slate-500 bg-slate-50 border-slate-200',
-            }
-          : item
+  const handleCancelReservation = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings?id=${id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('İptal işlemi başarısız.')
+      
+      setList((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: 'İptal Edildi',
+                statusColor: 'text-slate-500 bg-slate-50 border-slate-200',
+              }
+            : item
+        )
       )
-    )
-    setCancelTarget(null)
+    } catch (err) {
+      alert('Rezervasyon iptal edilirken bir hata oluştu.')
+    } finally {
+      setCancelTarget(null)
+    }
   }
 
   return (
@@ -163,89 +150,101 @@ export default function ReservationsPage() {
 
       {/* ── Reservations List ── */}
       <div className="space-y-4">
-        <AnimatePresence mode="popLayout">
-          {filteredList.map((res) => (
-            <motion.div
-              key={res.id}
-              layout
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.35 }}
-              className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row md:items-center"
-            >
-              {/* Thumbnail */}
-              <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 md:h-24 md:w-36">
-                <img
-                  src={res.image}
-                  alt={res.title}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-
-              {/* Core Details */}
-              <div className="flex-1 space-y-1">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                  <h3 className="text-base font-extrabold text-slate-900 sm:text-lg">{res.title}</h3>
-                  <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${res.statusColor}`}>
-                    {res.status === 'Onaylandı' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-                    {res.status}
-                  </span>
-                </div>
-
-                <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                  {res.subtitle}
-                </p>
-
-                <p className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                  Tarih: <span className="font-semibold text-slate-700">{res.dateRange}</span>
-                </p>
-
-                <p className="flex items-start gap-1.5 text-xs leading-normal text-slate-400">
-                  <Info className="h-3.5 w-3.5 shrink-0 text-slate-400 mt-0.5" />
-                  <span>{res.details}</span>
-                </p>
-              </div>
-
-              {/* Price & Action Actions */}
-              <div className="flex flex-row items-center justify-between border-t border-slate-100 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0 gap-3">
-                <div className="text-left md:text-right">
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tutar</p>
-                  <p className="text-xl font-black text-slate-900">{res.price}</p>
-                </div>
-
-                {res.status === 'Onaylandı' && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setShowQrModal(res.id)}
-                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-                      title="Bilet Barkodu / QR"
-                    >
-                      <QrCode className="h-4.5 w-4.5 text-slate-500" />
-                      <span className="hidden sm:inline">Bilet Gör</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => setCancelTarget(res.id)}
-                      className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 shadow-sm transition-colors hover:bg-red-50"
-                    >
-                      İptal Et
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {filteredList.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center text-slate-500">
-            <Layers className="mx-auto h-12 w-12 text-slate-300 mb-3" />
-            <h3 className="text-base font-bold text-slate-700">Rezervasyon Bulunamadı</h3>
-            <p className="text-xs text-slate-400 mt-1">Seçtiğiniz filtreye uygun aktif veya geçmiş rezervasyon kaydı bulunmuyor.</p>
+        {isLoading ? (
+          <div className="flex h-48 items-center justify-center rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-center text-red-800">
+            <p className="font-bold">{error}</p>
+          </div>
+        ) : (
+          <>
+            <AnimatePresence mode="popLayout">
+              {filteredList.map((res) => (
+                <motion.div
+                  key={res.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35 }}
+                  className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md md:flex-row md:items-center"
+                >
+                  {/* Thumbnail */}
+                  <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 md:h-24 md:w-36">
+                    <img
+                      src={res.image}
+                      alt={res.title}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  {/* Core Details */}
+                  <div className="flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                      <h3 className="text-base font-extrabold text-slate-900 sm:text-lg">{res.title}</h3>
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${res.statusColor}`}>
+                        {res.status === 'Onaylandı' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+                        {res.status}
+                      </span>
+                    </div>
+
+                    <p className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                      {res.subtitle}
+                    </p>
+
+                    <p className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                      Tarih: <span className="font-semibold text-slate-700">{res.dateRange}</span>
+                    </p>
+
+                    <p className="flex items-start gap-1.5 text-xs leading-normal text-slate-400">
+                      <Info className="h-3.5 w-3.5 shrink-0 text-slate-400 mt-0.5" />
+                      <span>{res.details}</span>
+                    </p>
+                  </div>
+
+                  {/* Price & Action Actions */}
+                  <div className="flex flex-row items-center justify-between border-t border-slate-100 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0 gap-3">
+                    <div className="text-left md:text-right">
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tutar</p>
+                      <p className="text-xl font-black text-slate-900">{res.price}</p>
+                    </div>
+
+                    {(res.status === 'Onaylandı' || res.status === 'Beklemede') && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setShowQrModal(res.id)}
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white p-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+                          title="Bilet Barkodu / QR"
+                        >
+                          <QrCode className="h-4.5 w-4.5 text-slate-500" />
+                          <span className="hidden sm:inline">Bilet Gör</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => setCancelTarget(res.id)}
+                          className="inline-flex items-center justify-center gap-1 rounded-xl border border-red-200 bg-white px-3 py-2.5 text-xs font-bold text-red-600 shadow-sm transition-colors hover:bg-red-50"
+                        >
+                          İptal Et
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {filteredList.length === 0 && (
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-12 text-center text-slate-500">
+                <Layers className="mx-auto h-12 w-12 text-slate-300 mb-3" />
+                <h3 className="text-base font-bold text-slate-700">Rezervasyon Bulunamadı</h3>
+                <p className="text-xs text-slate-400 mt-1">Seçtiğiniz filtreye uygun aktif veya geçmiş rezervasyon kaydı bulunmuyor.</p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -293,7 +292,7 @@ export default function ReservationsPage() {
 
               <div className="rounded-xl bg-slate-50 p-3 text-left text-xs font-semibold text-slate-600">
                 <p>Kod: <span className="font-bold text-slate-900">RZV-{showQrModal.toUpperCase()}</span></p>
-                <p className="mt-1">Kullanıcı: <span className="font-bold text-slate-900">Ahmet Yılmaz</span></p>
+                <p className="mt-1">Kullanıcı: <span className="font-bold text-slate-900">{userName}</span></p>
               </div>
 
               <button

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Users,
   Search,
@@ -9,73 +9,91 @@ import {
   ChevronDown
 } from 'lucide-react'
 
-const USERS_DATA = [
-  {
-    id: 'usr-1',
-    name: 'Ahmet Yılmaz',
-    email: 'ahmet.yilmaz@gmail.com',
-    role: 'Müşteri',
-    status: 'Aktif',
-    joined: '12.01.2026',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'usr-2',
-    name: 'Mehmet Demir',
-    email: 'mehmet.demir@gmail.com',
-    role: 'İşletme Sahibi',
-    status: 'Aktif',
-    joined: '20.02.2026',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'usr-3',
-    name: 'Elif Şahin',
-    email: 'elif.sahin@outlook.com',
-    role: 'Müşteri',
-    status: 'Askıda',
-    joined: '03.03.2026',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'usr-4',
-    name: 'Can Ertekin',
-    email: 'can.ertekin@rezervo.com',
-    role: 'Yönetici',
-    status: 'Aktif',
-    joined: '01.01.2026',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces',
-  },
-]
+
 
 type FilterRole = 'all' | 'Müşteri' | 'İşletme Sahibi' | 'Yönetici'
 
+const ROLE_MAP: Record<string, string> = {
+  'admin': 'Yönetici',
+  'business': 'İşletme Sahibi',
+  'customer': 'Müşteri',
+  'Yönetici': 'admin',
+  'İşletme Sahibi': 'business',
+  'Müşteri': 'customer'
+}
+
 export default function AdminUsersPage() {
-  const [list, setList] = useState(USERS_DATA)
+  const [list, setList] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<FilterRole>('all')
+  const [isLoading, setIsLoading] = useState(true)
 
-  const toggleStatus = (id: string) => {
-    setList((prev) =>
-      prev.map((u) =>
-        u.id === id ? { ...u, status: u.status === 'Aktif' ? 'Askıda' : 'Aktif' } : u
-      )
-    )
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch('/api/admin/users')
+        if (res.ok) {
+          const data = await res.json()
+          setList(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch users:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUsers()
+  }, [])
+
+  const toggleStatus = async (id: string) => {
+    const user = list.find((u) => u.id === id)
+    if (!user) return
+    const nextStatus = user.status === 'aktif' ? 'pasif' : 'aktif'
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: nextStatus })
+      })
+      if (res.ok) {
+        setList((prev) =>
+          prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err)
+    }
   }
 
-  const changeRole = (id: string, currentRole: string) => {
-    const nextRoles: Record<string, string> = {
-      'Müşteri': 'İşletme Sahibi',
-      'İşletme Sahibi': 'Yönetici',
-      'Yönetici': 'Müşteri',
+  const changeRole = async (id: string) => {
+    const dbRoleCycle: Record<string, string> = {
+      'admin': 'customer',
+      'business': 'admin',
+      'customer': 'business'
     }
-    const newRole = nextRoles[currentRole] || 'Müşteri'
-    setList((prev) => prev.map((u) => (u.id === id ? { ...u, role: newRole } : u)))
+    const user = list.find((u) => u.id === id)
+    if (!user) return
+    const nextDbRole = dbRoleCycle[user.role] || 'customer'
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, role: nextDbRole })
+      })
+      if (res.ok) {
+        setList((prev) =>
+          prev.map((u) => (u.id === id ? { ...u, role: nextDbRole } : u))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to update role:', err)
+    }
   }
 
   const filteredList = list.filter((u) => {
     const matchesSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter = roleFilter === 'all' || u.role === roleFilter
+    const uiRole = ROLE_MAP[u.role] || 'Müşteri'
+    const matchesFilter = roleFilter === 'all' || uiRole === roleFilter
     return matchesSearch && matchesFilter
   })
 
@@ -134,82 +152,88 @@ export default function AdminUsersPage() {
 
       {/* ── Users Table list ── */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left text-sm text-slate-500">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-400">
-              <tr>
-                <th className="px-6 py-4">Kullanıcı</th>
-                <th className="px-6 py-4">Rolü</th>
-                <th className="px-6 py-4">Durumu</th>
-                <th className="px-6 py-4">Kayıt Tarihi</th>
-                <th className="px-6 py-4 text-right">Aksiyonlar</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredList.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50/50">
-                  
-                  {/* User details */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-100 shrink-0">
-                        <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900">{user.name}</p>
-                        <p className="text-xs text-slate-400 font-medium">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Role */}
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => changeRole(user.id, user.role)}
-                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all hover:bg-slate-100 ${
-                        user.role === 'Yönetici' ? 'text-purple-600 bg-purple-50' : user.role === 'İşletme Sahibi' ? 'text-blue-600 bg-blue-50' : 'text-slate-600 bg-slate-50'
-                      }`}
-                      title="Tıkla ve Rolü Değiştir"
-                    >
-                      {user.role}
-                      <ChevronDown className="h-3 w-3 opacity-60" />
-                    </button>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
-                      user.status === 'Aktif' ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'
-                    }`}>
-                      {user.status}
-                    </span>
-                  </td>
-
-                  {/* Date joined */}
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-400">
-                    {user.joined}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => toggleStatus(user.id)}
-                      className={`inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition-colors ${
-                        user.status === 'Aktif' ? 'border-red-200 text-red-600 bg-white hover:bg-red-50' : 'border-emerald-200 text-emerald-600 bg-white hover:bg-emerald-50'
-                      }`}
-                    >
-                      {user.status === 'Aktif' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-                      <span>{user.status === 'Aktif' ? 'Askıya Al' : 'Aktifleştir'}</span>
-                    </button>
-                  </td>
-
+        {isLoading ? (
+          <div className="flex h-48 items-center justify-center bg-white p-5">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm text-slate-500">
+              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th className="px-6 py-4">Kullanıcı</th>
+                  <th className="px-6 py-4">Rolü</th>
+                  <th className="px-6 py-4">Durumu</th>
+                  <th className="px-6 py-4">Kayıt Tarihi</th>
+                  <th className="px-6 py-4 text-right">Aksiyonlar</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredList.map((user) => (
+                  <tr key={user.id} className="hover:bg-slate-50/50">
+                    
+                    {/* User details */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 overflow-hidden rounded-full bg-slate-100 shrink-0">
+                          <img src={user.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces'} alt={user.name} className="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900">{user.name}</p>
+                          <p className="text-xs text-slate-400 font-medium">{user.email}</p>
+                        </div>
+                      </div>
+                    </td>
 
-        {filteredList.length === 0 && (
+                    {/* Role */}
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => changeRole(user.id)}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold transition-all hover:bg-slate-100 cursor-pointer ${
+                          ROLE_MAP[user.role] === 'Yönetici' ? 'text-purple-600 bg-purple-50' : ROLE_MAP[user.role] === 'İşletme Sahibi' ? 'text-blue-600 bg-blue-50' : 'text-slate-600 bg-slate-50'
+                        }`}
+                        title="Tıkla ve Rolü Değiştir"
+                      >
+                        {ROLE_MAP[user.role] || 'Müşteri'}
+                        <ChevronDown className="h-3 w-3 opacity-60" />
+                      </button>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold ${
+                        user.status === 'aktif' ? 'text-emerald-700 bg-emerald-50' : 'text-red-700 bg-red-50'
+                      }`}>
+                        {user.status === 'aktif' ? 'Aktif' : 'Askıda'}
+                      </span>
+                    </td>
+
+                    {/* Date joined */}
+                    <td className="px-6 py-4 text-xs font-semibold text-slate-400">
+                      {user.joined || '01.06.2026'}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => toggleStatus(user.id)}
+                        className={`inline-flex items-center gap-1 rounded-xl border px-3 py-2 text-xs font-bold shadow-sm transition-colors cursor-pointer ${
+                          user.status === 'aktif' ? 'border-red-200 text-red-600 bg-white hover:bg-red-50' : 'border-emerald-200 text-emerald-600 bg-white hover:bg-emerald-50'
+                        }`}
+                      >
+                        {user.status === 'aktif' ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                        <span>{user.status === 'aktif' ? 'Askıya Al' : 'Aktifleştir'}</span>
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {!isLoading && filteredList.length === 0 && (
           <div className="py-12 text-center text-slate-500">
             <Users className="mx-auto h-12 w-12 text-slate-300 mb-3" />
             <h3 className="text-base font-bold text-slate-700">Kullanıcı Bulunamadı</h3>

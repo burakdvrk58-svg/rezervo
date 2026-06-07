@@ -39,7 +39,7 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     let targetEmail = email
@@ -62,36 +62,42 @@ export default function LoginPage() {
 
     if (validate(isShortcut)) {
       setIsLoading(true)
-      
-      // Save simulated session in localStorage
-      if (typeof window !== 'undefined') {
-        let role = 'customer'
-        const lEmail = targetEmail.toLowerCase()
-        if (lEmail.includes('admin')) {
-          role = 'admin'
-        } else if (lEmail.includes('business') || lEmail.includes('isletme')) {
-          role = 'business'
-        }
-        localStorage.setItem('rezervo_logged_in', 'true')
-        localStorage.setItem('rezervo_user_role', role)
-      }
-
-      // Simulate API request
-      setTimeout(() => {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: targetEmail, password: isShortcut ? trimmedPassword : password })
+        })
+        const data = await res.json()
         setIsLoading(false)
-        setLoginSuccess(true)
-        // Redirect based on role in email
-        setTimeout(() => {
-          const lEmail = targetEmail.toLowerCase()
-          if (lEmail.includes('admin')) {
-            router.push('/admin')
-          } else if (lEmail.includes('business') || lEmail.includes('isletme')) {
-            router.push('/business')
-          } else {
-            router.push('/customer')
+        if (res.ok) {
+          setLoginSuccess(true)
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('rezervo_logged_in', 'true')
+            localStorage.setItem('rezervo_user_role', data.user.role)
+            localStorage.setItem('rezervo_user_name', data.user.name)
+            localStorage.setItem('rezervo_user_email', data.user.email)
+            localStorage.setItem('rezervo_user_id', data.user.id)
           }
-        }, 1200)
-      }, 1500)
+
+          setTimeout(() => {
+            const role = data.user.role
+            if (role === 'admin') {
+              router.push('/admin')
+            } else if (role === 'business') {
+              router.push('/business')
+            } else {
+              router.push('/customer')
+            }
+          }, 1200)
+        } else {
+          setErrors((prev) => ({ ...prev, email: data.error || 'Giriş sırasında bir hata oluştu.' }))
+        }
+      } catch (err) {
+        setIsLoading(false)
+        setErrors((prev) => ({ ...prev, email: 'Bağlantı hatası oluştu.' }))
+      }
     }
   }
 

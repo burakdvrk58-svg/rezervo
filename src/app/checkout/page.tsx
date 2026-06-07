@@ -45,6 +45,7 @@ function CheckoutContent() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [createdBookingId, setCreatedBookingId] = useState('')
 
   // Card formatting
   const handleCardNumberChange = (val: string) => {
@@ -88,15 +89,49 @@ function CheckoutContent() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
       setIsLoading(true)
-      // Simulate validation
-      setTimeout(() => {
-        setIsLoading(false)
+      try {
+        const category = isSchool
+          ? (hotelName.toLowerCase().includes('kütüphane') || hotelName.toLowerCase().includes('oda') ? 'library' : 'teacher')
+          : 'hotel'
+
+        const bookingData = {
+          userId: typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-customer') : 'u-customer',
+          category,
+          title: hotelName,
+          subtitle: isSchool ? 'Kampüs Binası' : 'Lara, Antalya',
+          date: isSchool ? '08 Haziran Pazartesi' : '12 - 19 Haziran 2026',
+          time: isSchool ? 'Süre: 15-20 Dakika' : '7 Gece',
+          details: isSchool ? 'Soru Çözümü & Grup Çalışması' : 'Standart Oda • 2 Yetişkin, 1 Çocuk',
+          image: category === 'library'
+            ? 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=300&h=200&fit=crop'
+            : category === 'teacher'
+            ? 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=300&h=200&fit=crop'
+            : 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=300&h=200&fit=crop',
+          price: isSchool ? 'Ücretsiz' : hotelPrice
+        }
+
+        const res = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bookingData),
+        })
+
+        if (!res.ok) {
+          throw new Error('Rezervasyon kaydedilemedi.')
+        }
+
+        const data = await res.json()
+        setCreatedBookingId(data.id)
         setShowSuccessModal(true)
-      }, 2000)
+      } catch (err) {
+        setErrors((prev) => ({ ...prev, submit: 'Rezervasyon tamamlanırken bir hata oluştu. Lütfen tekrar deneyin.' }))
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -294,6 +329,12 @@ function CheckoutContent() {
                   </div>
                 )}
 
+                {errors.submit && (
+                  <p className="text-xs text-red-500 font-bold text-center mb-3">
+                    {errors.submit}
+                  </p>
+                )}
+
                 {/* CTA Action button */}
                 <motion.button
                   id="checkout-submit"
@@ -390,7 +431,7 @@ function CheckoutContent() {
               <div className="my-5 rounded-2xl bg-slate-50 p-4 text-left text-xs font-semibold text-slate-600 space-y-1.5">
                 <p>İşlem: <span className="font-bold text-slate-900">{hotelName}</span></p>
                 <p>Harcama Tutarı: <span className="font-bold text-slate-900">{isSchool ? '0 TL' : hotelPrice}</span></p>
-                <p>Onay Kodu: <span className="font-bold text-slate-900">RZV-SCHOOL7</span></p>
+                <p>Onay Kodu: <span className="font-bold text-slate-900">{createdBookingId || 'RZV-SCHOOL7'}</span></p>
               </div>
 
               <button

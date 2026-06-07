@@ -44,15 +44,27 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
       setIsLoading(true)
-      // Simulate API request
-      setTimeout(() => {
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        })
+        const data = await res.json()
         setIsLoading(false)
-        setRegisterSuccess(true)
-      }, 1500)
+        if (res.ok) {
+          setRegisterSuccess(true)
+        } else {
+          setErrors((prev) => ({ ...prev, email: data.error || 'Kayıt sırasında bir hata oluştu.' }))
+        }
+      } catch (err) {
+        setIsLoading(false)
+        setErrors((prev) => ({ ...prev, email: 'Bağlantı hatası oluştu.' }))
+      }
     }
   }
 
