@@ -32,9 +32,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [userName, setUserName] = useState('')
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUserName(localStorage.getItem('rezervo_user_name') || '')
+    const loadUser = () => {
+      if (typeof window !== 'undefined') {
+        setUserName(localStorage.getItem('rezervo_user_name') || '')
+      }
     }
+    loadUser()
+    window.addEventListener('storage', loadUser)
+    return () => window.removeEventListener('storage', loadUser)
   }, [])
 
   const handleLogout = () => {
@@ -55,6 +60,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
+  }
+
+  const getSettingsHref = () => {
+    if (pathname?.startsWith('/business')) return '/business/settings'
+    if (pathname?.startsWith('/admin')) return '/admin/settings'
+    return '/customer/settings'
   }
 
   // Dynamic role info extraction based on the URL prefix
@@ -389,13 +400,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute right-0 z-20 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
                     >
-                      <button
+                      <Link
+                        href={getSettingsHref()}
                         onClick={() => setShowProfileMenu(false)}
                         className="flex w-full items-center gap-2 rounded-lg px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 text-left"
                       >
                         <User className="h-4 w-4 text-slate-400" />
                         Profilim
-                      </button>
+                      </Link>
                       <hr className="my-1 border-slate-100" />
                       <Link
                         href="/login"

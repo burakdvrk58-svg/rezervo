@@ -42,8 +42,8 @@ export function Navbar() {
 
   const getDashboardLink = () => {
     if (userRole === 'admin') return { label: 'Yönetici Paneli', href: '/admin' }
-    if (userRole === 'business') return { label: 'İşletme Paneli', href: '/business' }
-    return { label: 'Müşteri Paneli', href: '/customer' }
+    if (userRole === 'business') return { label: 'Akademisyen Paneli', href: '/business' }
+    return { label: 'Öğrenci Paneli', href: '/customer' }
   }
 
   const dashboard = getDashboardLink()

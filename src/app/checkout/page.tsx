@@ -82,6 +82,7 @@ function CheckoutContent() {
           setLastName(nameParts.slice(1).join(' ') || '')
           setEmail(localStorage.getItem('rezervo_user_email') || 'customer@rezervo.com')
           setStudentNo('1420') // Mock student ID
+          setPhone(localStorage.getItem('rezervo_user_phone') || '0555 123 45 67')
         }
       } catch (err) {
         console.error('Veri yükleme hatası:', err)
@@ -305,9 +306,15 @@ function CheckoutContent() {
                         type="text"
                         placeholder="Ahmet"
                         value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
+                        onChange={(e) => {
+                          setFirstName(e.target.value)
+                          if (errors.firstName) setErrors((prev) => ({ ...prev, firstName: '' }))
+                        }}
                         className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.firstName ? 'border-red-500' : 'border-slate-200'}`}
                       />
+                      {errors.firstName && (
+                        <p className="text-[10px] text-red-500 font-bold mt-0.5">{errors.firstName}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -316,9 +323,15 @@ function CheckoutContent() {
                         type="text"
                         placeholder="Yılmaz"
                         value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
+                        onChange={(e) => {
+                          setLastName(e.target.value)
+                          if (errors.lastName) setErrors((prev) => ({ ...prev, lastName: '' }))
+                        }}
                         className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.lastName ? 'border-red-500' : 'border-slate-200'}`}
                       />
+                      {errors.lastName && (
+                        <p className="text-[10px] text-red-500 font-bold mt-0.5">{errors.lastName}</p>
+                      )}
                     </div>
                   </div>
 
@@ -329,9 +342,15 @@ function CheckoutContent() {
                         type="email"
                         placeholder="ahmet.yilmaz@gmail.com"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value)
+                          if (errors.email) setErrors((prev) => ({ ...prev, email: '' }))
+                        }}
                         className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.email ? 'border-red-500' : 'border-slate-200'}`}
                       />
+                      {errors.email && (
+                        <p className="text-[10px] text-red-500 font-bold mt-0.5">{errors.email}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -340,9 +359,15 @@ function CheckoutContent() {
                         type="text"
                         placeholder="0555 123 45 67"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          setPhone(e.target.value)
+                          if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }))
+                        }}
                         className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.phone ? 'border-red-500' : 'border-slate-200'}`}
                       />
+                      {errors.phone && (
+                        <p className="text-[10px] text-red-500 font-bold mt-0.5">{errors.phone}</p>
+                      )}
                     </div>
                   </div>
 
@@ -353,9 +378,15 @@ function CheckoutContent() {
                         type="text"
                         placeholder="Örn: 1420"
                         value={studentNo}
-                        onChange={(e) => setStudentNo(e.target.value)}
+                        onChange={(e) => {
+                          setStudentNo(e.target.value)
+                          if (errors.studentNo) setErrors((prev) => ({ ...prev, studentNo: '' }))
+                        }}
                         className={`w-full rounded-xl border bg-slate-50/50 px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 ${errors.studentNo ? 'border-red-500' : 'border-slate-200'}`}
                       />
+                      {errors.studentNo && (
+                        <p className="text-[10px] text-red-500 font-bold mt-0.5">{errors.studentNo}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1.5 sm:col-span-2">
