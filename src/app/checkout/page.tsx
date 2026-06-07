@@ -26,6 +26,19 @@ const TOPICS = [
   'Kariyer & Staj Danışmanlığı'
 ]
 
+const getNext7Days = () => {
+  const dates = []
+  const today = new Date()
+  for (let i = 0; i < 7; i++) {
+    const d = new Date()
+    d.setDate(today.getDate() + i)
+    const id = d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', weekday: 'long' })
+    const label = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' })
+    dates.push({ id, label })
+  }
+  return dates
+}
+
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -49,7 +62,8 @@ function CheckoutContent() {
   
   // Slot selection state
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState('08 Haziran Pazartesi') // Default date
+  const [selectedDate, setSelectedDate] = useState('')
+  const [dateOptions, setDateOptions] = useState<{ id: string; label: string }[]>([])
 
   // Form states
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -84,6 +98,10 @@ function CheckoutContent() {
           setStudentNo('1420') // Mock student ID
           setPhone(localStorage.getItem('rezervo_user_phone') || '0555 123 45 67')
         }
+
+        const dates = getNext7Days()
+        setDateOptions(dates)
+        setSelectedDate(dates[0].id)
       } catch (err) {
         console.error('Veri yükleme hatası:', err)
       } finally {
@@ -120,6 +138,22 @@ function CheckoutContent() {
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
+  }
+
+  const addNotification = (title: string, desc: string, role: string) => {
+    if (typeof window !== 'undefined') {
+      const current = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
+      const newNotif = {
+        id: `notif-${Date.now()}`,
+        title,
+        desc,
+        time: 'Şimdi',
+        unread: true,
+        role
+      }
+      localStorage.setItem('rezervo_notifications', JSON.stringify([newNotif, ...current]))
+      window.dispatchEvent(new Event('storage'))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,6 +196,14 @@ function CheckoutContent() {
 
         const data = await res.json()
         setCreatedBookingId(data.id)
+        
+        // Add notification for academician
+        addNotification(
+          'Yeni Görüşme Talebi',
+          `${firstName} ${lastName} yeni bir danışmanlık randevusu talebi gönderdi.`,
+          'business'
+        )
+
         setShowSuccessModal(true)
       } catch (err) {
         setErrors((prev) => ({ ...prev, submit: 'Randevu onaylanırken hata oluştu. Lütfen tekrar deneyin.' }))
@@ -229,12 +271,9 @@ function CheckoutContent() {
                     1. Görüşme Tarihi & Saat Dilimi Seçimi
                   </h2>
 
-                  {/* Simple Date Selector Tabs */}
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: '08 Haziran Pazartesi', label: '08 Haz Pazartesi' },
-                      { id: '10 Haziran Çarşamba', label: '10 Haz Çarşamba' },
-                    ].map((d) => (
+                  {/* Dynamic 7-Day Date Selector Tabs */}
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                    {dateOptions.map((d) => (
                       <button
                         key={d.id}
                         type="button"
@@ -242,7 +281,7 @@ function CheckoutContent() {
                           setSelectedDate(d.id)
                           setSelectedSlot(null) // Reset slot on date change
                         }}
-                        className={`rounded-xl border p-3 text-center text-xs font-bold transition-all ${
+                        className={`rounded-xl border py-2.5 px-4 text-center text-xs font-bold transition-all shrink-0 ${
                           selectedDate === d.id
                             ? 'border-primary bg-primary/5 text-primary'
                             : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'

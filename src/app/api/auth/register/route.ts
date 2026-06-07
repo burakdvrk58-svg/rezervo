@@ -3,7 +3,7 @@ import { readDb, writeDb } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json()
+    const { name, email, password, universityId, universityName } = await request.json()
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -33,7 +33,9 @@ export async function POST(request: Request) {
       email: email.toLowerCase(),
       password, // In a production app, use bcrypt to hash passwords
       role: 'customer',
-      status: 'aktif'
+      status: 'aktif',
+      universityId: universityId || 'univ-1',
+      universityName: universityName || 'Boğaziçi Üniversitesi'
     }
 
     db.users = [...users, newUser]

@@ -79,6 +79,8 @@ export default function LoginPage() {
             localStorage.setItem('rezervo_user_name', data.user.name)
             localStorage.setItem('rezervo_user_email', data.user.email)
             localStorage.setItem('rezervo_user_id', data.user.id)
+            if (data.user.universityId) localStorage.setItem('rezervo_user_university_id', data.user.universityId)
+            if (data.user.universityName) localStorage.setItem('rezervo_user_university_name', data.user.universityName)
           }
 
           setTimeout(() => {

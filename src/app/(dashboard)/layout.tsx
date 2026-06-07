@@ -49,29 +49,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
 
-  // Notification local state
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'Randevu Onaylandı', desc: 'Prof. Dr. Albert Ali Salah randevunuzu onayladı.', time: '1s önce', unread: true },
-    { id: 2, title: 'Yeni İstek', desc: 'Bir öğrenci görüşme talebi gönderdi.', time: '3s önce', unread: true },
-    { id: 3, title: 'Güncelleme', desc: 'Randevu takviminiz güncellendi.', time: 'Dün', unread: false },
-  ])
-
-  const unreadCount = notifications.filter((n) => n.unread).length
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
-  }
-
   const getSettingsHref = () => {
     if (pathname?.startsWith('/business')) return '/business/settings'
     if (pathname?.startsWith('/admin')) return '/admin/settings'
     return '/customer/settings'
   }
 
-  // Dynamic role info extraction based on the URL prefix
+  const [notifications, setNotifications] = useState<any[]>([])
+
   const getRoleInfo = () => {
     if (pathname?.startsWith('/business')) {
       return {
+        roleKey: 'business',
         roleLabel: 'Akademisyen Paneli',
         userRole: 'Akademisyen',
         userDisplayName: userName || 'Prof. Dr. Albert Ali Salah',
@@ -87,6 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     if (pathname?.startsWith('/admin')) {
       return {
+        roleKey: 'admin',
         roleLabel: 'Yönetici Paneli',
         userRole: 'Sistem Yöneticisi',
         userDisplayName: userName || 'Can Ertekin',
@@ -102,6 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     // Default to customer role
     return {
+      roleKey: 'customer',
       roleLabel: 'Öğrenci Paneli',
       userRole: 'Öğrenci',
       userDisplayName: userName || 'Ahmet Yılmaz',
@@ -115,7 +106,48 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }
 
-  const { roleLabel, userRole, userDisplayName, userAvatar, menuItems } = getRoleInfo()
+  const { roleKey, roleLabel, userRole, userDisplayName, userAvatar, menuItems } = getRoleInfo()
+
+  useEffect(() => {
+    const loadNotifications = () => {
+      if (typeof window !== 'undefined') {
+        const all = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
+        const filtered = all.filter((n: any) => n.role === roleKey)
+        if (filtered.length === 0) {
+          const defaults = roleKey === 'business'
+            ? [
+                { id: 'd-1', title: 'Yeni İstek', desc: 'Ahmet Yılmaz görüşme talebi gönderdi.', time: '3s önce', unread: true, role: 'business' },
+                { id: 'd-2', title: 'Sistem Güncellemesi', desc: 'Randevu takviminiz aktif edildi.', time: 'Dün', unread: false, role: 'business' }
+              ]
+            : [
+                { id: 'd-3', title: 'Randevu Onaylandı', desc: 'Prof. Dr. Albert Ali Salah randevunuzu onayladı.', time: '1s önce', unread: true, role: 'customer' },
+                { id: 'd-4', title: 'Hoş Geldiniz', desc: 'Rezervo akademisyen danışmanlık sistemine hoş geldiniz.', time: 'Dün', unread: false, role: 'customer' }
+              ]
+          setNotifications(defaults)
+          if (all.length === 0) {
+            localStorage.setItem('rezervo_notifications', JSON.stringify(defaults))
+          }
+        } else {
+          setNotifications(filtered)
+        }
+      }
+    }
+
+    loadNotifications()
+    window.addEventListener('storage', loadNotifications)
+    return () => window.removeEventListener('storage', loadNotifications)
+  }, [roleKey])
+
+  const unreadCount = notifications.filter((n) => n.unread).length
+
+  const markAllRead = () => {
+    if (typeof window !== 'undefined') {
+      const all = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
+      const updated = all.map((n: any) => n.role === roleKey ? { ...n, unread: false } : n)
+      localStorage.setItem('rezervo_notifications', JSON.stringify(updated))
+      window.dispatchEvent(new Event('storage'))
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50/50">

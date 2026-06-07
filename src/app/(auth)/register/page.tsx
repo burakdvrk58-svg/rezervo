@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { User, Mail, Lock, Eye, EyeOff, Calendar, AlertCircle } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, Calendar, AlertCircle, GraduationCap } from 'lucide-react'
 
 export default function RegisterPage() {
   const [name, setName] = useState('')
@@ -11,11 +11,36 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [universities, setUniversities] = useState<any[]>([
+    { id: 'univ-1', name: 'Boğaziçi Üniversitesi' },
+    { id: 'univ-2', name: 'Orta Doğu Teknik Üniversitesi' },
+    { id: 'univ-3', name: 'İstanbul Teknik Üniversitesi' },
+    { id: 'univ-4', name: 'Koç Üniversitesi' },
+    { id: 'univ-5', name: 'Bilkent Üniversitesi' }
+  ])
+  const [selectedUniv, setSelectedUniv] = useState('univ-1')
 
   // Validation & state
   const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; agreeTerms?: string }>({})
   const [isLoading, setIsLoading] = useState(false)
   const [registerSuccess, setRegisterSuccess] = useState(false)
+
+  useEffect(() => {
+    async function loadUnivs() {
+      try {
+        const res = await fetch('/api/academicians')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.universities && data.universities.length > 0) {
+            setUniversities(data.universities)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load universities:', err)
+      }
+    }
+    loadUnivs()
+  }, [])
 
   const validate = () => {
     const newErrors: { name?: string; email?: string; password?: string; agreeTerms?: string } = {}
@@ -49,10 +74,17 @@ export default function RegisterPage() {
     if (validate()) {
       setIsLoading(true)
       try {
+        const foundUniv = universities.find(u => u.id === selectedUniv)
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password })
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            universityId: selectedUniv,
+            universityName: foundUniv ? foundUniv.name : 'Boğaziçi Üniversitesi'
+          })
         })
         const data = await res.json()
         setIsLoading(false)
@@ -161,6 +193,23 @@ export default function RegisterPage() {
                 {errors.email}
               </p>
             )}
+          </div>
+
+          {/* University input */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-600">Üniversite Seçimi</label>
+            <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-3 hover:border-slate-300">
+              <GraduationCap className="h-5 w-5 text-slate-400 shrink-0" />
+              <select
+                value={selectedUniv}
+                onChange={(e) => setSelectedUniv(e.target.value)}
+                className="w-full bg-transparent text-sm text-slate-800 focus:outline-none"
+              >
+                {universities.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Password input */}

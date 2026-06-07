@@ -16,6 +16,19 @@ import {
 
 type FilterStatus = 'all' | 'Beklemede' | 'Onaylandı' | 'Reddedildi'
 
+const getNext7Days = () => {
+  const dates = []
+  const today = new Date()
+  for (let i = 0; i < 7; i++) {
+    const d = new Date()
+    d.setDate(today.getDate() + i)
+    const id = d.toLocaleDateString('tr-TR', { day: '2-digit', month: 'long', weekday: 'long' })
+    const label = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', weekday: 'short' })
+    dates.push({ id, label })
+  }
+  return dates
+}
+
 const ALL_STANDARD_SLOTS = [
   '09:00 - 09:15', '09:15 - 09:30', '09:30 - 09:45', '09:45 - 10:00',
   '10:00 - 10:15', '10:15 - 10:30', '10:30 - 10:45', '10:45 - 11:00',
@@ -38,7 +51,8 @@ export default function BusinessRequestsPage() {
   const [slotSuccessMsg, setSlotSuccessMsg] = useState('')
 
   // Date selector for status bar
-  const [selectedDate, setSelectedDate] = useState('08 Haziran Pazartesi')
+  const [selectedDate, setSelectedDate] = useState('')
+  const [dateOptions, setDateOptions] = useState<{ id: string; label: string }[]>([])
 
   const userEmail = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_email') || 'business@rezervo.com') : 'business@rezervo.com'
   const userName = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_name') || 'Prof. Dr. Albert Ali Salah') : 'Prof. Dr. Albert Ali Salah'
@@ -83,8 +97,27 @@ export default function BusinessRequestsPage() {
 
   useEffect(() => {
     document.title = 'Yönetim Paneli | Rezervo'
+    const dates = getNext7Days()
+    setDateOptions(dates)
+    setSelectedDate(dates[0].id)
     fetchData()
   }, [])
+
+  const addNotification = (title: string, desc: string, role: string) => {
+    if (typeof window !== 'undefined') {
+      const current = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
+      const newNotif = {
+        id: `notif-${Date.now()}`,
+        title,
+        desc,
+        time: 'Şimdi',
+        unread: true,
+        role
+      }
+      localStorage.setItem('rezervo_notifications', JSON.stringify([newNotif, ...current]))
+      window.dispatchEvent(new Event('storage'))
+    }
+  }
 
   const handleAction = async (id: string, newStatus: 'Onaylandı' | 'Reddedildi') => {
     const action = newStatus === 'Onaylandı' ? 'approve' : 'reject'
@@ -95,6 +128,13 @@ export default function BusinessRequestsPage() {
         body: JSON.stringify({ id, action })
       })
       if (res.ok) {
+        const targetReq = list.find(item => item.id === id)
+        addNotification(
+          newStatus === 'Onaylandı' ? 'Randevu Onaylandı' : 'Randevu Reddedildi',
+          `${userName} ile ${targetReq?.date || ''} tarihindeki görüşmeniz ${newStatus.toLowerCase()} olarak güncellendi.`,
+          'customer'
+        )
+
         setList((prev) =>
           prev.map((item) => {
             if (item.id === id) {
@@ -335,16 +375,13 @@ export default function BusinessRequestsPage() {
             {/* Date Picker for Status */}
             <div className="space-y-1">
               <label className="text-[10px] font-semibold text-slate-400 uppercase">Tarih Seçimi</label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {[
-                  { id: '08 Haziran Pazartesi', label: '08 Haz Paz' },
-                  { id: '10 Haziran Çarşamba', label: '10 Haz Çar' },
-                ].map((d) => (
+              <div className="flex gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                {dateOptions.map((d) => (
                   <button
                     key={d.id}
                     type="button"
                     onClick={() => setSelectedDate(d.id)}
-                    className={`rounded-lg border px-2 py-1.5 text-center text-[10px] font-bold transition-all ${
+                    className={`rounded-lg border px-3 py-1.5 text-center text-[10px] font-bold transition-all shrink-0 ${
                       selectedDate === d.id
                         ? 'border-primary bg-primary/5 text-primary'
                         : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
