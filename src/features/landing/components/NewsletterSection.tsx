@@ -38,15 +38,15 @@ export function NewsletterSection() {
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                 <Sparkles className="h-3 w-3" />
-                Fırsatları Kaçırmayın
+                Duyuruları Kaçırmayın
               </div>
             </div>
 
             <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
-              Özel İndirimler & Kampanyalar
+              Akademik Takvim & Müsaitlik Bildirimleri
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-base text-blue-100">
-              Bültenimize abone olarak en iyi otel, uçuş ve tatil fırsatlarından ilk siz haberdar olun. Üstelik ilk rezervasyonunuza özel %10 indirim kazanın!
+              Bültenimize abone olarak üniversitenizdeki yeni akademisyenlerden, açılan ek danışmanlık slotlarından ve önemli dönem takvimi duyurularından ilk siz haberdar olun!
             </p>
 
             {/* Form */}

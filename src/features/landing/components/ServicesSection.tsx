@@ -1,64 +1,37 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Building2, Plane, Car, Ticket, Utensils, Sparkles, ArrowRight } from 'lucide-react'
+import { GraduationCap, BookOpen, Clock, Sparkles, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 const SERVICES = [
   {
-    icon: Building2,
-    title: 'Lüks Oteller & Konaklama',
-    description: 'Dünya çapında binlerce otel, villa ve butik konaklama seçeneği arasından size en uygun olanı bulun.',
+    icon: GraduationCap,
+    title: 'Akademisyen Görüşmeleri',
+    description: 'Boğaziçi, ODTÜ, İTÜ, Koç ve Bilkent üniversitelerindeki akademisyenlerle 15\'er dakikalık birebir görüşmeler ayarlayın.',
     tag: 'Popüler',
     color: 'from-blue-500 to-indigo-600',
     bgLight: 'bg-blue-50/50 text-blue-600',
-    link: '/hizmetler/otel',
+    link: '/search',
   },
   {
-    icon: Plane,
-    title: 'Uçak Biletleri',
-    description: 'En popüler hava yollarından en uygun fiyatlı yurt içi ve yurt dışı uçuş alternatiflerini listeleyin ve karşılaştırın.',
-    tag: 'En Uygun Fiyat',
+    icon: BookOpen,
+    title: 'Tez & Proje Danışmanlığı',
+    description: 'Akademik tezleriniz ve bitirme projeleriniz için hocalarınızdan kolayca onay ve danışmanlık talep edin.',
+    tag: 'Tavsiye Edilen',
     color: 'from-sky-400 to-blue-600',
     bgLight: 'bg-sky-50/50 text-sky-600',
-    link: '/hizmetler/ucak',
+    link: '/search',
   },
   {
-    icon: Car,
-    title: 'Araç Kiralama',
-    description: 'Seyahatiniz süresince konforlu bir sürüş için geniş araç filomuzdan dilediğiniz aracı anında kiralayın.',
-    tag: 'Hızlı Teslimat',
+    icon: Clock,
+    title: 'Ders Kaydı & Müfredat Onayı',
+    description: 'Dönem kayıtları ve müfredat değişiklikleri öncesinde danışman hocalarınızın takviminden saatinizi ayırtın.',
+    tag: 'Yeni',
     color: 'from-emerald-400 to-teal-600',
     bgLight: 'bg-emerald-50/50 text-emerald-600',
-    link: '/hizmetler/arac',
-  },
-  {
-    icon: Ticket,
-    title: 'Etkinlik & Konser',
-    description: 'Konserler, festivaller, tiyatrolar ve yerel etkinlikler için biletinizi sıraya girmeden güvenle alın.',
-    tag: 'Yeni',
-    color: 'from-purple-500 to-pink-600',
-    bgLight: 'bg-purple-50/50 text-purple-600',
-    link: '/hizmetler/etkinlik',
-  },
-  {
-    icon: Utensils,
-    title: 'Restoran & Masa',
-    description: 'Şehrin en iyi restoranlarında sıra beklemeden masanızı ayırtın, özel menülerin tadını çıkarın.',
-    tag: 'Gurme',
-    color: 'from-amber-500 to-orange-600',
-    bgLight: 'bg-amber-50/50 text-amber-600',
-    link: '/hizmetler/restoran',
-  },
-  {
-    icon: Sparkles,
-    title: 'Spa & Wellness',
-    description: 'Zorlu bir haftanın ardından yenilenmek için en seçkin spa, masaj ve güzellik merkezlerinden randevunuzu alın.',
-    tag: 'Özel Hizmet',
-    color: 'from-rose-500 to-red-600',
-    bgLight: 'bg-rose-50/50 text-rose-600',
-    link: '/hizmetler/spa',
-  },
+    link: '/search',
+  }
 ]
 
 export function ServicesSection() {
@@ -80,7 +53,7 @@ export function ServicesSection() {
             className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5"
           >
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            <span className="text-xs font-semibold text-primary">Kategorilerimiz</span>
+            <span className="text-xs font-semibold text-primary">Hizmetlerimiz</span>
           </motion.div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -89,7 +62,7 @@ export function ServicesSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
           >
-            Her İhtiyacınıza Uygun Rezervasyon
+            Akademik Rezervasyonlarınızı Kolayca Yönetin
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -98,7 +71,7 @@ export function ServicesSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-4 text-base text-muted-foreground"
           >
-            Rezervo ile tek tıkla otel, uçak biletleri, araç kiralama ve çok daha fazlasını keşfedin ve saniyeler içinde rezervasyonunuzu tamamlayın.
+            Rezervo ile tek tıkla üniversitenizi seçin, akademisyenlerin müsaitlik durumlarını inceleyin ve saniyeler içinde randevunuzu tamamlayın.
           </motion.p>
         </div>
 
@@ -141,7 +114,7 @@ export function ServicesSection() {
                   href={link}
                   className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition-all group-hover:gap-2"
                 >
-                  Şimdi Keşfet
+                  Randevu Al
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

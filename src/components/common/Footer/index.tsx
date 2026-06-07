@@ -12,10 +12,9 @@ const QUICK_LINKS = [
 ]
 
 const SERVICES = [
-  { label: 'Otel Konaklama', href: '/hizmetler/otel' },
-  { label: 'Uçak Biletleri', href: '/hizmetler/ucak' },
-  { label: 'Araç Kiralama', href: '/hizmetler/arac' },
-  { label: 'Etkinlik & Konser', href: '/hizmetler/etkinlik' },
+  { label: 'Akademisyen Görüşmeleri', href: '/search' },
+  { label: 'Tez & Proje Danışmanlığı', href: '/search' },
+  { label: 'Ders Kaydı Onayı', href: '/search' },
 ]
 
 const LEGAL_LINKS = [
@@ -81,7 +80,7 @@ export function Footer() {
               </div>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
-              Rezervo, tatil ve iş seyahatleriniz için konaklamadan uçak biletine, araç kiralamadan etkinlik biletlerine kadar her şeyi tek bir yerden güvenle yönetmenizi sağlar.
+              Rezervo, üniversite içi akademik danışmanlık, hoca-öğrenci görüşmeleri ve randevu planlamasını tek bir platformdan kolayca yönetmenizi sağlar.
             </p>
             {/* Social Links */}
             <div className="mt-6 flex gap-3.5">

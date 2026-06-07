@@ -43,13 +43,13 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <span>Güvenli & Hızlı Giriş Altyapısı</span>
             </motion.div>
             
-            <motion.h1
+             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-4xl font-extrabold leading-tight tracking-tight"
             >
-              Rezervasyonlarınızı
+              Akademik Randevularınızı
               <br />
               Tek Bir Yerden Yönetin.
             </motion.h1>
@@ -60,7 +60,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               transition={{ duration: 0.5, delay: 0.2 }}
               className="max-w-md text-base leading-relaxed text-slate-300"
             >
-              Otel, uçak, araç ve etkinlik biletlerinizi Rezervo ile kolayca takip edin, işlemlerinizi tek tıkla tamamlayın.
+              Üniversite ve akademik danışmanlık randevularınızı Rezervo ile kolayca takip edin, görüşmelerinizi saniyeler içinde planlayın.
             </motion.p>
           </div>
 

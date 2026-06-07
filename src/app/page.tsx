@@ -10,9 +10,9 @@ import { NewsletterSection } from '@/features/landing/components/NewsletterSecti
 import { Footer } from '@/components/common/Footer'
 
 export const metadata: Metadata = {
-  title: 'Rezervo — Rezervasyonunuzu Kolayca Yapın',
+  title: 'Rezervo — Üniversite Akademik Danışmanlık ve Randevu Sistemi',
   description:
-    'Tüm rezervasyon ihtiyaçlarınız için hızlı, kolay ve güvenilir bir sistem. Otel, uçak, araç ve etkinlik rezervasyonu.',
+    'Öğrenciler ve akademisyenler için hızlı, kolay ve güvenilir görüşme randevusu yönetim portalı.',
 }
 
 export default function LandingPage() {

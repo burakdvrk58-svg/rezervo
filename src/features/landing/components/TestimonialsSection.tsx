@@ -7,23 +7,23 @@ import Image from 'next/image'
 const TESTIMONIALS = [
   {
     name: 'Ahmet Yılmaz',
-    role: 'Gezgin / Yazılımcı',
+    role: 'Bilgisayar Mühendisliği Öğrencisi',
     rating: 5,
-    comment: 'Rezervo sayesinde tatil planlarımı yapmak inanılmaz kolaylaştı. Otel ve araç kiralamayı tek bir platformdan, sadece birkaç dakika içinde tamamladım. Arayüzü çok hızlı ve akıcı.',
+    comment: 'Rezervo sayesinde danışman hocalarımızdan randevu almak inanılmaz kolaylaştı. Boş slotları anlık olarak görüp 15 dakikalık bitirme projesi görüşmemi saniyeler içinde ayarladım.',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces',
   },
   {
-    name: 'Buse Demir',
-    role: 'İşletme Sahibi',
+    name: 'Doç. Dr. Ayşe Bener',
+    role: 'Akademisyen / Danışman',
     rating: 5,
-    comment: 'Bir iş seyahati düzenleyicisi olarak Rezervo benim kurtarıcım oldu. Müşteri desteği son derece ilgili ve 7/24 hizmet vermeleri büyük bir artı. Kesinlikle tavsiye ederim.',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces',
+    comment: 'Öğrencilerimin tez ve proje danışmanlığı taleplerini tek bir ekrandan yönetmek işimi çok kolaylaştırdı. Kendi müsaitlik saatlerimi belirleyebiliyorum ve öğrenciler de oradan boş saatleri seçiyor.',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces',
   },
   {
     name: 'Can Kaya',
-    role: 'Etkinlik Yöneticisi',
+    role: 'Matematik Bölümü Öğrenci Temsilcisi',
     rating: 5,
-    comment: 'Konser ve tiyatro biletlerini alırken yaşadığım onay karmaşası Rezervo ile son buldu. Barkodlu biletler anında e-postama geldi ve girişte hiçbir sorun yaşamadım. Harika altyapı.',
+    comment: 'Ders kayıt dönemlerinde hocaların kapısında saatlerce beklemek Rezervo ile son buldu. QR kodlu dijital geçiş kartımla tam randevu saatinde görüşmeye gidiyorum.',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces',
   },
 ]
@@ -57,7 +57,7 @@ export function TestimonialsSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
           >
-            Mutlu Kullanıcılarımızın Deneyimleri
+            Öğrenci & Akademisyen Deneyimlerimiz
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -66,7 +66,7 @@ export function TestimonialsSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mt-4 text-base text-muted-foreground"
           >
-            Rezervo platformunu kullanan binlerce gezgin, tatilci ve iş ortağının gerçek yorumları.
+            Rezervo akademik danışmanlık portalını kullanan binlerce öğrenci ve hocanın gerçek deneyimleri.
           </motion.p>
         </div>
 

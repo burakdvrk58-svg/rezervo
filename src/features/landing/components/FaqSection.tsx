@@ -6,24 +6,24 @@ import { Plus, Minus, HelpCircle } from 'lucide-react'
 
 const FAQS = [
   {
-    question: 'Rezervasyon işlemini nasıl yapabilirim?',
-    answer: 'Ana sayfadaki arama motorunu kullanarak otel, uçuş veya araç kiralama kriterlerinizi girin. Karşınıza çıkan sonuçlardan dilediğinizi seçip kişisel bilgilerinizi ve ödeme detaylarınızı girdikten sonra anında rezervasyon onayınızı alabilirsiniz.',
+    question: 'Nasıl görüşme randevusu alabilirim?',
+    answer: 'Ana sayfadaki arama panelini veya Akademisyen Bul sayfasını kullanarak üniversite ve akademisyen seçimi yapın. Akademisyenin o güne ait uygun 15 dakikalık saat dilimlerinden birini seçip öğrenci bilgilerinizi ve görüşme konunuzu girerek kolayca randevu oluşturabilirsiniz.',
   },
   {
-    question: 'Rezervasyonumu iptal edebilir miyim veya değiştirebilir miyim?',
-    answer: 'Evet, çoğu rezervasyon seçeneğimiz esnek iptal/değişiklik politikalarına sahiptir. Rezervasyonlarım sekmesinden veya aldığınız onay e-postasındaki bağlantıyı kullanarak işlem koşullarına göre iptal veya tarih değişikliği yapabilirsiniz.',
+    question: 'Randevumu iptal edebilir miyim veya değiştirebilir miyim?',
+    answer: 'Evet. Öğrenci Paneli > Görüşmelerim sekmesine giderek bekleyen veya onaylanan görüşme taleplerinizi istediğiniz zaman iptal edebilirsiniz.',
   },
   {
-    question: 'Ödemelerim güvenli mi? Hangi kartlar geçerli?',
-    answer: 'Rezervo, 256-bit SSL şifreleme ve 3D Secure altyapısıyla en yüksek düzeyde güvenlik sağlar. Tüm Visa, MasterCard, Troy ve American Express kredi/banka kartlarıyla güvenle ödeme yapabilirsiniz.',
+    question: 'Bu hizmet ücretli midir?',
+    answer: 'Hayır. Üniversite içi akademik danışmanlık, tez kontrolü ve hoca görüşmeleri öğrenciler için tamamen ücretsizdir. Hiçbir aşamada kart veya ödeme bilgisi talep edilmemektedir.',
   },
   {
-    question: 'Ekstra bir ücret veya gizli komisyon ödüyor muyum?',
-    answer: 'Hayır, Rezervo tamamen şeffaf bir fiyat politikası benimser. Arama sonuçlarında ve ödeme ekranında gördüğünüz nihai tutar dışında hiçbir sürpriz ek ücret veya gizli komisyon kartınızdan tahsil edilmez.',
+    question: 'Akademisyen görüşme talebimi onaylamazsa ne olur?',
+    answer: 'Talebiniz ilk etapta "Beklemede" olarak oluşturulur. Akademisyen talebinizi inceleyip onayladığında sistem üzerinden durumu "Onaylandı" olarak güncellenir ve size bildirim gönderilir. Akademisyen reddederse durum "Reddedildi" olarak güncellenir ve başka bir slot seçebilirsiniz.',
   },
   {
     question: 'Herhangi bir sorun yaşarsam size nasıl ulaşabilirim?',
-    answer: '7/24 hizmet veren müşteri destek ekibimize web sitemizdeki İletişim sayfasından, destek@rezervo.com e-posta adresinden veya 0850 123 45 67 numaralı çağrı merkezimizden dilediğiniz an ulaşabilirsiniz.',
+    answer: 'Sistemle ilgili teknik sorularınız için destek@rezervo.com adresinden teknik ekibimize, akademik randevu detayları için ise doğrudan kendi danışman hocanıza veya bölüm sekreterliğine ulaşabilirsiniz.',
   },
 ]
 

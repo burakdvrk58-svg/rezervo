@@ -48,10 +48,10 @@ export function HeroSection() {
           {/* Heading */}
           <motion.div {...fadeUpProps(0.1)} className="space-y-3">
             <h1 className="text-[2.8rem] font-extrabold leading-[1.15] tracking-tight text-white lg:text-5xl">
-              Rezervasyonunuzu
+              Akademik Randevunuzu
               <br />
               <span className="relative text-blue-400">
-                kolayca yapın
+                kolayca alın
                 {/* Underline decoration */}
                 <svg className="absolute -bottom-1 left-0 w-full" height="6" viewBox="0 0 300 6" fill="none" preserveAspectRatio="none">
                   <path d="M0 3 Q75 6 150 3 Q225 0 300 3" stroke="#60A5FA" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.8" />
@@ -59,7 +59,7 @@ export function HeroSection() {
               </span>
             </h1>
             <p className="max-w-md text-base leading-relaxed text-slate-300">
-              Tüm rezervasyon ihtiyaçlarınız için hızlı, kolay ve güvenilir bir sistem.
+              Üniversite danışmanlık görüşmeleri ve akademisyen randevuları için hızlı ve güvenilir yönetim sistemi.
             </p>
           </motion.div>
 
