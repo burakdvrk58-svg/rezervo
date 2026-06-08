@@ -44,7 +44,7 @@ interface TestimonialCard {
   bgGradient: string
 }
 import Hero from '@/components/ui/animated-shader-hero'
-
+import BorderRotate from '@/components/ui/animated-gradient-border'
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<'student' | 'academician'>('student')
@@ -249,13 +249,30 @@ export default function LandingPage() {
             <a href="#testimonials" className="text-slate-400 hover:text-white transition-colors">Yorumlar</a>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/login" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors">
-              Giriş Yap
-            </Link>
-            <Link href="/register" className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-black hover:bg-slate-200 transition-all duration-200 shadow-lg shadow-white/5">
-              Kayıt Ol
-            </Link>
+          <div className="hidden md:flex items-center gap-4">
+            <BorderRotate
+              borderRadius={8}
+              borderWidth={1.5}
+              backgroundColor="#000000"
+              animationSpeed={6}
+              className="inline-block transition-all duration-300 hover:scale-105"
+            >
+              <Link href="/login" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors block">
+                Giriş Yap
+              </Link>
+            </BorderRotate>
+            
+            <BorderRotate
+              borderRadius={8}
+              borderWidth={1.5}
+              backgroundColor="#000000"
+              animationSpeed={4}
+              className="inline-block transition-all duration-300 hover:scale-105"
+            >
+              <Link href="/register" className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-black hover:bg-slate-200 transition-all duration-200 block">
+                Kayıt Ol
+              </Link>
+            </BorderRotate>
           </div>
 
           {/* Mobile Menu Button */}

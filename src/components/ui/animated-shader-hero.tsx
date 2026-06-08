@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import BorderRotate from './animated-gradient-border';
+
 
 // Types for component props
 interface HeroProps {
@@ -449,20 +451,46 @@ const Hero: React.FC<HeroProps> = ({
           {buttons && (
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10 animate-fade-in-up animation-delay-800">
               {buttons.primary && (
-                <button 
-                  onClick={buttons.primary.onClick}
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25"
+                <BorderRotate
+                  borderRadius={9999}
+                  borderWidth={2}
+                  backgroundColor="#000000"
+                  animationSpeed={4}
+                  gradientColors={{
+                    primary: '#f97316',
+                    secondary: '#eab308',
+                    accent: '#ef4444'
+                  }}
+                  className="inline-block transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-orange-500/20"
                 >
-                  {buttons.primary.text}
-                </button>
+                  <button 
+                    onClick={buttons.primary.onClick}
+                    className="px-8 py-4 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-black rounded-full font-semibold text-lg"
+                  >
+                    {buttons.primary.text}
+                  </button>
+                </BorderRotate>
               )}
               {buttons.secondary && (
-                <button 
-                  onClick={buttons.secondary.onClick}
-                  className="px-8 py-4 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-300/30 hover:border-orange-300/50 text-orange-100 rounded-full font-semibold text-lg transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                <BorderRotate
+                  borderRadius={9999}
+                  borderWidth={1.5}
+                  backgroundColor="#000000"
+                  animationSpeed={5}
+                  gradientColors={{
+                    primary: '#f97316',
+                    secondary: '#facc15',
+                    accent: '#ea580c'
+                  }}
+                  className="inline-block transition-all duration-300 hover:scale-105"
                 >
-                  {buttons.secondary.text}
-                </button>
+                  <button 
+                    onClick={buttons.secondary.onClick}
+                    className="px-8 py-4 bg-orange-500/10 hover:bg-orange-500/20 text-orange-100 rounded-full font-semibold text-lg backdrop-blur-sm"
+                  >
+                    {buttons.secondary.text}
+                  </button>
+                </BorderRotate>
               )}
             </div>
           )}
