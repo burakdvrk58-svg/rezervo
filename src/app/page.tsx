@@ -229,7 +229,7 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="relative min-h-screen bg-black text-slate-300 font-sans selection:bg-white/20 selection:text-white overflow-x-hidden">
+    <div className="dark relative min-h-screen bg-black text-slate-300 font-sans selection:bg-white/20 selection:text-white overflow-x-hidden">
       
       {/* ── AMBIENT BACKGROUND GLOWS (Hugo style) ── */}
       <div className="absolute top-[-200px] left-[-10%] w-[50%] h-[600px] bg-blue-500/10 rounded-full blur-[140px] pointer-events-none z-0" />
@@ -493,7 +493,7 @@ export default function LandingPage() {
           </div>
 
           {/* Interactive Screen Preview */}
-          <div className="glass rounded-3xl border border-white/10 overflow-hidden shadow-2xl relative bg-black/60 backdrop-blur-2xl">
+          <div className="rounded-3xl border border-white/10 overflow-hidden shadow-2xl relative bg-[#090D16]/95 backdrop-blur-2xl">
             
             {/* Window Chrome */}
             <div className="h-12 border-b border-white/5 bg-white/5 px-6 flex items-center justify-between">
@@ -520,7 +520,7 @@ export default function LandingPage() {
                     : 'Görüşme İsteklerini Kolayca Yönetin ve Raporlayın'}
                 </h3>
                 
-                <p className="text-slate-400 text-sm leading-relaxed">
+                <p className="text-slate-300 text-sm leading-relaxed">
                   {activeTab === 'student'
                     ? 'Üniversite seçimi yapın, akademisyenlerin puanlarını ve yorumlarını karşılaştırın. Haftalık takvim üzerinden dilediğiniz saati seçip anında rezervasyonunuzu tamamlayın.'
                     : 'Gelen randevu isteklerini listeleyin, onaylayın veya iptal edin. Toplam danışmanlık saati, aylık seans analitikleri ve öğrenci yorum puanlamalarına tek bir ekrandan ulaşın.'}
@@ -542,7 +542,7 @@ export default function LandingPage() {
               </div>
 
               {/* Visual UI Demonstration inside screen */}
-              <div className="lg:col-span-7 bg-white/3 border border-white/5 rounded-2xl p-6 min-h-[340px] flex flex-col justify-between relative overflow-hidden bg-black/40">
+              <div className="lg:col-span-7 bg-black/40 border border-white/5 rounded-2xl p-6 min-h-[340px] flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-[-20%] right-[-10%] w-48 h-48 bg-indigo-500/10 blur-3xl rounded-full" />
                 
                 {activeTab === 'student' ? (
