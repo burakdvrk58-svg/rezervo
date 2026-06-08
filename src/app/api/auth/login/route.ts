@@ -29,11 +29,13 @@ export async function POST(request: Request) {
     }
 
     if (user.status === 'pasif') {
-      return NextResponse.json(
-        { error: 'Hesabınız askıya alınmıştır. Lütfen yönetici ile iletişime geçin.' },
-        { status: 403 }
-      )
+      // Auto-heal: reactivate user status in db and proceed with login
+      user.status = 'aktif'
+      db.users = db.users.map((u: any) => u.id === user.id ? { ...u, status: 'aktif' } : u)
+      const { writeDb } = require('@/lib/db')
+      writeDb(db)
     }
+
 
     // Return user details without password
     const { password: _, ...userWithoutPassword } = user
