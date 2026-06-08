@@ -553,7 +553,7 @@ export default function LandingPage() {
                         <Search className="w-3.5 h-3.5 text-slate-400" />
                         <span className="text-slate-300">Boğaziçi Üniversitesi</span>
                       </div>
-                      <span className="text-xs text-slate-400">14 Akademisyen Listelendi</span>
+                      <span className="text-xs text-slate-300">14 Akademisyen Listelendi</span>
                     </div>
 
                     <div className="space-y-3">
@@ -564,11 +564,11 @@ export default function LandingPage() {
                         <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div>
                             <h4 className="text-xs font-semibold text-white">{adv.name}</h4>
-                            <p className="text-[10px] text-slate-400 mt-0.5">{adv.role}</p>
+                            <p className="text-[10px] text-slate-300 mt-0.5">{adv.role}</p>
                             <div className="flex items-center gap-1.5 mt-2">
                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                               <span className="text-[11px] font-bold text-white">{adv.rating}</span>
-                              <span className="text-[9px] text-slate-500">(32 yorum)</span>
+                              <span className="text-[9px] text-slate-300">(32 yorum)</span>
                             </div>
                           </div>
                           <button className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-[10px] font-semibold hover:bg-blue-500 transition-colors">
@@ -594,8 +594,8 @@ export default function LandingPage() {
                         <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div>
                             <div className="text-xs font-semibold text-white">{req.student}</div>
-                            <div className="text-[9px] text-slate-400 mt-0.5">{req.type}</div>
-                            <div className="text-[9px] text-blue-400 mt-1">{req.time}</div>
+                            <div className="text-[9px] text-slate-300 mt-0.5">{req.type}</div>
+                            <div className="text-[9px] text-blue-300 mt-1">{req.time}</div>
                           </div>
                           <div className="flex gap-2">
                             <button className="px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-semibold hover:bg-emerald-500/20 transition-colors">
