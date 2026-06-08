@@ -8,7 +8,6 @@ import {
   Bell,
   Sparkles,
   ArrowRight,
-  ChevronRight,
   Clock,
   Search,
   CheckCircle,
@@ -692,48 +691,70 @@ export default function HugoPreviewPage() {
         </div>
 
         {/* Sticky Cards Stack */}
-        <div className="space-y-24 relative">
-          {features.map((feature) => (
-            <div
-              key={feature.id}
-              className="sticky top-[12vh] w-full"
-              style={{ zIndex: feature.id }}
-            >
-              <div className={`w-full rounded-3xl bg-gradient-to-br ${feature.gradient} border border-white/10 p-6 md:p-10 shadow-2xl relative overflow-hidden min-h-[380px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center`}>
-                
-                {/* Decorative glowing sphere inside card */}
-                <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="space-y-16 relative">
+          {features.map((feature, index) => {
+            const bgColors = ['bg-[#1a2e1d]', 'bg-[#332214]', 'bg-[#131d2b]'];
+            const borderColors = ['border-[#253f28]', 'border-[#4a3421]', 'border-[#202f42]'];
+            const serifHeadlines = [
+              "Akademik takviminizi saniyeler içinde planlayın.",
+              "Öğrencilerden şeffaf ve yapıcı geri bildirimler alın.",
+              "Tüm sekmelerinizde anında ve gecikmesiz bildirim akışı."
+            ];
+            const bgColor = bgColors[index] || 'bg-[#18181b]';
+            const borderColor = borderColors[index] || 'border-white/10';
+            const serifHeadline = serifHeadlines[index] || '';
 
-                {/* Card Text Content */}
-                <div className="lg:col-span-7 space-y-5">
-                  <span className={`text-xs font-bold uppercase tracking-wider ${feature.textColor}`}>
-                    {feature.featureBadge}
-                  </span>
-                  <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
-                    {feature.title}
-                  </h3>
-                  <p className="text-slate-200 text-sm md:text-base font-semibold leading-relaxed">
-                    {feature.subtitle}
-                  </p>
-                  <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
-                    {feature.description}
-                  </p>
+            return (
+              <div
+                key={feature.id}
+                className="sticky top-[14vh] w-full pb-12"
+                style={{ zIndex: feature.id }}
+              >
+                <div className={`w-full rounded-[32px] ${bgColor} border ${borderColor} p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col justify-between items-center text-center min-h-[580px] md:min-h-[640px] transform hover:scale-[1.01] transition-transform duration-300`}>
                   
-                  <div className="pt-2">
-                    <Link href="/register" className="inline-flex items-center gap-2 text-xs font-semibold text-white hover:underline">
-                      Hemen Keşfet <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
+                  {/* Decorative glowing sphere inside card */}
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-white/3 blur-3xl rounded-full pointer-events-none" />
+
+                  {/* Top section: Badges & Headings */}
+                  <div className="flex flex-col items-center max-w-3xl space-y-4 mb-8 relative z-10">
+                    <span className={`text-[11px] font-bold uppercase tracking-widest ${feature.textColor} bg-white/5 border border-white/10 px-3 py-1 rounded-full`}>
+                      {feature.featureBadge}
+                    </span>
+                    <h3 className="text-2xl md:text-4xl font-bold text-white">
+                      {feature.title}
+                    </h3>
+                    <p className="text-slate-300 text-sm md:text-base max-w-2xl leading-relaxed">
+                      {feature.description}
+                    </p>
                   </div>
-                </div>
 
-                {/* Card Visual Content */}
-                <div className="lg:col-span-5 flex items-center justify-center bg-black/20 border border-white/5 rounded-2xl overflow-hidden shadow-inner">
-                  {feature.imageComponent}
-                </div>
+                  {/* Center section: Large browser container mockup */}
+                  <div className="w-full max-w-xl mx-auto rounded-2xl border border-white/10 overflow-hidden shadow-2xl bg-[#090D16]/90 flex flex-col my-auto relative z-10">
+                    {/* Browser Chrome Bar */}
+                    <div className="h-9 border-b border-white/5 bg-white/5 px-4 flex items-center gap-1.5 shrink-0">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+                    </div>
+                    {/* Visual Inner Mockup */}
+                    <div className="p-4 bg-black/20 flex items-center justify-center min-h-[220px]">
+                      {feature.imageComponent}
+                    </div>
+                  </div>
 
+                  {/* Bottom section: Serif elegant headline */}
+                  {serifHeadline && (
+                    <div className="mt-8 border-t border-white/5 pt-8 w-full max-w-2xl relative z-10">
+                      <p className="font-serif italic text-lg md:text-2xl text-slate-200">
+                        &ldquo;{serifHeadline}&rdquo;
+                      </p>
+                    </div>
+                  )}
+
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
