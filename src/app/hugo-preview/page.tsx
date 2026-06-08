@@ -559,6 +559,124 @@ export default function HugoPreviewPage() {
         </div>
       </section>
 
+      {/* ── WHY REZERVO SECTION (Hugo.ai "Why?" style) ── */}
+      <section className="py-24 relative z-10 max-w-7xl mx-auto px-6 overflow-hidden">
+        {/* Ambient glow behind Why? */}
+        <div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[600px] h-[400px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="relative min-h-[650px] lg:h-[700px] flex flex-col justify-center items-center">
+          
+          {/* Giant background graphics */}
+          <div className="absolute inset-0 flex flex-col justify-center items-center pointer-events-none select-none z-0">
+            {/* The Sphere/Planet under the text */}
+            <div className="w-[320px] h-[320px] md:w-[450px] md:h-[450px] bg-gradient-to-b from-slate-950 via-slate-900 to-black rounded-full border border-white/5 shadow-[0_0_120px_rgba(59,130,246,0.08)] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] opacity-80" />
+            
+            {/* Giant "Neden?" Title */}
+            <h2 className="text-[28vw] lg:text-[18vw] font-serif font-bold text-center tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white/10 via-white/5 to-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.08)] select-none">
+              Neden?
+            </h2>
+          </div>
+
+          {/* Scattered/Floating Cards Container */}
+          {/* Mobile Layout (Stacks/Grids on small screens) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full lg:hidden relative z-10 py-12">
+            {[
+              { title: "Güvenilir Eşleşme", text: "Her akademisyen ve öğrencinin kimliği doğrudan üniversite veritabanı ile doğrulanır. Sahte randevular ve çakışmalar tamamen önlenir.", rot: "rotate-[-1.5deg]" },
+              { title: "Gerçek Dünyaya Uygun", text: "Rezervo, yapay slaytlar veya karmaşık yapılar üzerine kurulmamıştır. Gerçek görüşmeleri ve ders intibaklarını kolaylaştırır.", rot: "rotate-[1.5deg]" },
+              { title: "Şeffaf Değerlendirme", text: "Öğrencilerin yaptığı değerlendirmeler ve 5 yıldızlı puanlar doğrudan akademisyen profilinde şeffafça listelenir.", rot: "rotate-[-2deg]" },
+              { title: "Uzun Ömürlü & Modüler", text: "Gelişmiş mimarimiz, üniversitenin büyümesine ve yeni fakültelerin eklenmesine göre pürüzsüzce ölçeklenir.", rot: "rotate-[2deg]" },
+              { title: "Sorumlu Otomasyon", text: "Akademisyenler takvimlerini özgürce yönetirken, onay ve iptaller anında öğrencilere iletilir.", rot: "rotate-[-1deg]" }
+            ].map((card, i) => (
+              <div key={i} className={`glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 backdrop-blur-md transform ${card.rot}`}>
+                <h4 className="text-white font-bold text-base mb-2">{card.title}</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">{card.text}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Scattered Layout */}
+          <div className="hidden lg:block absolute inset-0 z-10">
+            
+            {/* Card 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              whileHover={{ y: -6, rotate: -6 }}
+              className="absolute left-[2%] top-[14%] w-[320px] glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 shadow-[0_12px_16px_-5px_rgba(0,0,0,0.3)] transform rotate-[-4deg] transition-all duration-300 cursor-pointer"
+            >
+              <h4 className="text-white font-bold text-[15px] mb-2">Güvenilir Eşleşme.</h4>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Her akademisyen ve öğrencinin kimliği doğrudan üniversite veritabanı ile doğrulanır. Sahte randevular ve çakışmalar tamamen önlenir.
+              </p>
+            </motion.div>
+
+            {/* Card 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              whileHover={{ y: -6, rotate: 1 }}
+              className="absolute left-[38%] top-[2%] w-[330px] glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 shadow-[0_12px_16px_-5px_rgba(0,0,0,0.3)] transform rotate-[3deg] transition-all duration-300 cursor-pointer"
+            >
+              <h4 className="text-white font-bold text-[15px] mb-2">Gerçek Dünyaya Uygun.</h4>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Rezervo, yapay slaytlar üzerine kurulmamıştır. Gerçek öğrenci-akademisyen görüşmelerini, ders intibaklarını ve tez süreçlerini kolaylaştırır.
+              </p>
+            </motion.div>
+
+            {/* Card 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ y: -6, rotate: -8 }}
+              className="absolute right-[2%] top-[10%] w-[320px] glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 shadow-[0_12px_16px_-5px_rgba(0,0,0,0.3)] transform rotate-[-6deg] transition-all duration-300 cursor-pointer"
+            >
+              <h4 className="text-white font-bold text-[15px] mb-2">Şeffaf Değerlendirme.</h4>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Öğrencilerin yaptığı değerlendirmeler ve 5 yıldızlı puanlar doğrudan akademisyen profilinde listelenir. Memnuniyet herkes için şeffaftır.
+              </p>
+            </motion.div>
+
+            {/* Card 4 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              whileHover={{ y: -6, rotate: 8 }}
+              className="absolute left-[8%] bottom-[12%] w-[330px] glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 shadow-[0_12px_16px_-5px_rgba(0,0,0,0.3)] transform rotate-[5deg] transition-all duration-300 cursor-pointer"
+            >
+              <h4 className="text-white font-bold text-[15px] mb-2">Uzun Ömürlü & Modüler.</h4>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Gelişmiş mimarimiz, üniversitenin büyümesine ve yeni fakültelerin eklenmesine göre pürüzsüzce ölçeklenir. Sonraki on yıllık akademik ihtiyaçları destekler.
+              </p>
+            </motion.div>
+
+            {/* Card 5 */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              whileHover={{ y: -6, rotate: 2 }}
+              className="absolute right-[6%] bottom-[8%] w-[330px] glass rounded-2xl p-6 border border-white/10 bg-[#1c1c1c]/90 shadow-[0_12px_16px_-5px_rgba(0,0,0,0.3)] transform rotate-[4deg] transition-all duration-300 cursor-pointer"
+            >
+              <h4 className="text-white font-bold text-[15px] mb-2">Sorumlu Otomasyon.</h4>
+              <p className="text-slate-400 text-[11px] leading-relaxed">
+                Akademisyenler çalışma takvimlerini tamamen bağımsız yönetirken, seans onay ve iptalleri anında öğrencilere iletilir. İletişim kopuklukları son bulur.
+              </p>
+            </motion.div>
+
+          </div>
+
+        </div>
+      </section>
+
       {/* ── STACKING CARDS (Hugo style Sticky Cards Stack) ── */}
       <section id="features" className="py-24 relative z-10 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-2xl mx-auto mb-20 space-y-4">
