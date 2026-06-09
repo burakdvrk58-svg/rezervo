@@ -52,11 +52,13 @@ export default function LandingPage() {
   const [hoveredCase, setHoveredCase] = useState<number | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userRole, setUserRole] = useState('')
+  const [mounted, setMounted] = useState(false)
   
   // Interactive Cursor Position
   const [whyMousePos, setWhyMousePos] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
+    setMounted(true)
     if (typeof window !== 'undefined') {
       const loggedIn = localStorage.getItem('rezervo_logged_in') === 'true'
       const role = localStorage.getItem('rezervo_user_role') || ''
@@ -281,7 +283,9 @@ export default function LandingPage() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            {isLoggedIn ? (
+            {!mounted ? (
+              <div className="h-10 w-40" />
+            ) : isLoggedIn ? (
               <>
                 <BorderRotate
                   borderRadius={8}
@@ -349,7 +353,7 @@ export default function LandingPage() {
               <a href="#why" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Neden Biz?</a>
               <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Sanal Panel</a>
               <a href="#integrations" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Entegrasyonlar</a>
-              {isLoggedIn ? (
+              {!mounted ? null : isLoggedIn ? (
                 <>
                   <Link href={dashboard.href} className="text-center py-3 text-blue-400 border border-blue-900/30 rounded-lg font-semibold bg-blue-950/20">
                     {dashboard.label}

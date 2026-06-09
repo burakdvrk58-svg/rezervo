@@ -18,8 +18,10 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userRole, setUserRole] = useState('')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const checkSession = () => {
       const loggedIn = localStorage.getItem('rezervo_logged_in') === 'true'
       const role = localStorage.getItem('rezervo_user_role') || ''
@@ -98,7 +100,9 @@ export function Navbar() {
 
         {/* ── Auth Buttons ── */}
         <div className="hidden items-center gap-2 md:flex">
-          {isLoggedIn ? (
+          {!mounted ? (
+            <div className="h-10 w-32" />
+          ) : isLoggedIn ? (
             <>
               <Link
                 href={dashboard.href}
@@ -168,7 +172,7 @@ export function Navbar() {
                 </Link>
               ))}
               <hr className="my-2 border-border" />
-              {isLoggedIn ? (
+              {!mounted ? null : isLoggedIn ? (
                 <>
                   <Link
                     href={dashboard.href}
