@@ -63,13 +63,13 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* ── Logo ── */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm">
-            <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
+        <Link href="/" className="flex items-center gap-3 shrink-0 group">
+          <div className="relative h-11 w-11 overflow-hidden rounded-xl bg-slate-950 border border-emerald-500/30 shadow-md shadow-emerald-500/10 group-hover:border-emerald-400 group-hover:shadow-emerald-400/20 transition-all duration-300">
+            <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.15]" />
           </div>
           <div>
-            <p className="text-base font-bold leading-none text-foreground">Rezervo</p>
-            <p className="text-[10px] leading-none text-muted-foreground mt-0.5">Rezervasyon Sisteminiz</p>
+            <p className="text-lg font-extrabold leading-none text-foreground tracking-tight group-hover:text-primary transition-colors">Rezervo</p>
+            <p className="text-[10px] font-medium leading-none text-muted-foreground mt-1 tracking-wide">Akademik Portal</p>
           </div>
         </Link>
 

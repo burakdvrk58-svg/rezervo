@@ -161,13 +161,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="flex h-full flex-col justify-between p-5">
           {/* Logo */}
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-2.5 px-2">
-              <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm shrink-0">
-                <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
+            <Link href="/" className="flex items-center gap-3 px-2 group">
+              <div className="relative h-11 w-11 overflow-hidden rounded-xl bg-slate-950 border border-emerald-500/20 shadow-md shadow-emerald-500/5 group-hover:border-emerald-400 group-hover:shadow-emerald-400/10 transition-all duration-300 shrink-0">
+                <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.15]" />
               </div>
               <div>
-                <p className="text-base font-bold leading-none text-slate-900 font-sans tracking-tight">Rezervo</p>
-                <p className="text-[10px] leading-none text-slate-500 mt-0.5">{roleLabel}</p>
+                <p className="text-base font-extrabold leading-none text-slate-900 font-sans tracking-tight group-hover:text-primary transition-colors">Rezervo</p>
+                <p className="text-[10px] font-semibold leading-none text-slate-500 mt-1">{roleLabel}</p>
               </div>
             </Link>
 
@@ -251,13 +251,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="space-y-6">
                   {/* Top Bar Logo & Close button */}
                   <div className="flex items-center justify-between">
-                    <Link href="/" className="flex items-center gap-2.5">
-                      <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm shrink-0">
-                        <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
+                    <Link href="/" className="flex items-center gap-3 group">
+                      <div className="relative h-11 w-11 overflow-hidden rounded-xl bg-slate-950 border border-emerald-500/20 shadow-md shadow-emerald-500/5 group-hover:border-emerald-400 group-hover:shadow-emerald-400/10 transition-all duration-300 shrink-0">
+                        <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.15]" />
                       </div>
                       <div>
-                        <p className="text-base font-bold leading-none text-slate-900">Rezervo</p>
-                        <p className="text-[10px] leading-none text-slate-500 mt-0.5">{roleLabel}</p>
+                        <p className="text-base font-extrabold leading-none text-slate-900 group-hover:text-primary transition-colors">Rezervo</p>
+                        <p className="text-[10px] font-semibold leading-none text-slate-500 mt-1">{roleLabel}</p>
                       </div>
                     </Link>
                     <button

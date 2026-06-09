@@ -269,11 +269,14 @@ export default function LandingPage() {
       {/* ── PAGE HEADER (Hugo Navigation) ── */}
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/5 backdrop-blur-[15px] bg-black/45">
         <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-8 h-8 overflow-hidden rounded-lg bg-slate-950 border border-white/10 shadow-lg">
-              <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative w-11 h-11 overflow-hidden rounded-xl bg-slate-950 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 group-hover:border-emerald-400 group-hover:shadow-emerald-400/20 transition-all duration-300">
+              <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.15]" />
             </div>
-            <span className="font-bold text-white text-lg tracking-tight">rezervo</span>
+            <div className="flex flex-col">
+              <span className="font-extrabold text-white text-xl tracking-tight group-hover:text-emerald-400 transition-colors">rezervo</span>
+              <span className="text-[9px] font-bold text-emerald-400/80 tracking-widest uppercase mt-0.5">ACADEMIC</span>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
