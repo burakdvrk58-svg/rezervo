@@ -60,4 +60,11 @@ public class ReservationController {
         ReservationResponseDto response = reservationService.rejectReservation(id);
         return ResponseEntity.ok(response);
     }
+
+    // ANALİTİK RAPORU — Sadece SUPER_ADMIN veya ROOM_LEADER yapabilir
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('ROOM_LEADER')")
+    @GetMapping("/analytics")
+    public ResponseEntity<java.util.Map<String, Object>> getAnalytics() {
+        return ResponseEntity.ok(reservationService.getAnalytics());
+    }
 }

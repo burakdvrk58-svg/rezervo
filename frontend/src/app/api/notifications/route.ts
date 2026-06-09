@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { readDb, writeDb } from '@/lib/db'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   try {
@@ -10,13 +10,22 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Kullanıcı kimliği (userId) gereklidir.' }, { status: 400 })
     }
 
-    const db = readDb()
-    const notifications = db.notifications || []
-    
-    // Filter by userId
-    const userNotifications = notifications.filter((n: any) => n.userId === userId)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    return NextResponse.json(userNotifications)
+    const headers: Record<string, string> = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const res = await fetch(`http://localhost:8081/api/notifications?userId=${userId}`, { headers })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Spring Boot bildirimleri yükleyemedi.' }, { status: res.status })
+    }
+
+    const data = await res.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json({ error: 'Bildirimler alınırken hata oluştu.' }, { status: 500 })
   }
@@ -24,29 +33,29 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { userId, role, title, desc } = await request.json()
+    const body = await request.json()
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    if (!userId || !role || !title || !desc) {
-      return NextResponse.json({ error: 'Eksik bildirim parametreleri.' }, { status: 400 })
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
     }
 
-    const db = readDb()
-    if (!db.notifications) db.notifications = []
+    const res = await fetch('http://localhost:8081/api/notifications', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    })
 
-    const newNotif = {
-      id: 'notif-' + Math.random().toString(36).substr(2, 9),
-      userId,
-      role,
-      title,
-      desc,
-      time: 'Şimdi',
-      unread: true
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Bildirim oluşturulamadı.' }, { status: res.status })
     }
 
-    db.notifications.unshift(newNotif)
-    writeDb(db)
-
-    return NextResponse.json(newNotif)
+    const data = await res.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json({ error: 'Bildirim oluşturulurken hata oluştu.' }, { status: 500 })
   }
@@ -54,27 +63,29 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, userId, role } = await request.json()
+    const body = await request.json()
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    const db = readDb()
-    if (!db.notifications) db.notifications = []
-
-    if (id) {
-      // Mark specific notification as read
-      db.notifications = db.notifications.map((n: any) =>
-        n.id === id ? { ...n, unread: false } : n
-      )
-    } else if (userId && role) {
-      // Mark all as read for this user
-      db.notifications = db.notifications.map((n: any) =>
-        n.userId === userId && n.role === role ? { ...n, unread: false } : n
-      )
-    } else {
-      return NextResponse.json({ error: 'Kimlik veya kullanıcı/rol bilgisi gereklidir.' }, { status: 400 })
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
     }
 
-    writeDb(db)
-    return NextResponse.json({ success: true })
+    const res = await fetch('http://localhost:8081/api/notifications', {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(body)
+    })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Bildirimler güncellenemedi.' }, { status: res.status })
+    }
+
+    const data = await res.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json({ error: 'Bildirimler güncellenirken hata oluştu.' }, { status: 500 })
   }

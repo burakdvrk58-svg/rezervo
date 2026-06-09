@@ -1,12 +1,63 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
 
 export async function GET() {
   try {
     const db = readDb()
+    const universities = db.universities || []
+    const staticAcademicians = db.academicians || []
+
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
+
+    const headers: Record<string, string> = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    // Fetch reviews from Spring Boot MySQL
+    let reviewsList: any[] = []
+    try {
+      const reviewsRes = await fetch('http://localhost:8081/api/reviews', { headers })
+      if (reviewsRes.ok) {
+        reviewsList = await reviewsRes.json()
+      }
+    } catch (err) {
+      console.error('Spring Boot reviews fetch failed, using fallback empty list:', err)
+    }
+
+    // Merge reviews into academicians dynamically
+    const dynamicAcademicians = staticAcademicians.map((acad: any) => {
+      const acadReviews = reviewsList.filter((r: any) => r.academicianId === acad.id)
+      
+      if (acadReviews.length > 0) {
+        const totalRatingSum = acadReviews.reduce((sum: number, r: any) => sum + r.rating, 0)
+        const avgRating = Math.round((totalRatingSum / acadReviews.length) * 10) / 10
+        
+        return {
+          ...acad,
+          reviews: acadReviews.length,
+          rating: avgRating,
+          reviewsList: acadReviews.map((r: any) => ({
+            studentName: r.studentName || 'Anonim Öğrenci',
+            rating: r.rating,
+            reviewText: r.reviewText || '',
+            date: r.createdAt ? new Date(r.createdAt).toLocaleDateString('tr-TR') : new Date().toLocaleDateString('tr-TR')
+          }))
+        }
+      }
+      return {
+        ...acad,
+        reviews: 0,
+        rating: 0.0,
+        reviewsList: []
+      }
+    })
+
     return NextResponse.json({
-      universities: db.universities || [],
-      academicians: db.academicians || []
+      universities,
+      academicians: dynamicAcademicians
     })
   } catch (error) {
     return NextResponse.json(
@@ -58,7 +109,8 @@ export async function PUT(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { academicianId, rating, reviewText, studentName, bookingId } = await request.json()
+    const body = await request.json()
+    const { academicianId, rating, reviewText, studentName, bookingId } = body
 
     if (!academicianId || !rating || !bookingId) {
       return NextResponse.json(
@@ -67,50 +119,39 @@ export async function POST(request: Request) {
       )
     }
 
-    const db = readDb()
-    const acadIndex = db.academicians.findIndex((a: any) => a.id === academicianId)
-    const bookingIndex = db.bookings.findIndex((b: any) => b.id === bookingId)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    if (acadIndex === -1) {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    // Save review in Spring Boot MySQL
+    const res = await fetch('http://localhost:8081/api/reviews', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        academicianId,
+        rating,
+        reviewText,
+        studentName,
+        bookingId
+      })
+    })
+
+    if (!res.ok) {
+      const errText = await res.text()
       return NextResponse.json(
-        { error: 'Akademisyen bulunamadı.' },
-        { status: 404 }
+        { error: errText || 'Değerlendirme Spring Boot veritabanına kaydedilemedi.' },
+        { status: res.status }
       )
     }
 
-    // Update academician rating & review count
-    const acad = db.academicians[acadIndex]
-    const currentReviewsCount = acad.reviews || 0
-    const currentRating = acad.rating || 0.0
-
-    // Recalculate average rating
-    const totalRatingSum = currentRating * currentReviewsCount + Number(rating)
-    const newReviewsCount = currentReviewsCount + 1
-    const newRating = Math.round((totalRatingSum / newReviewsCount) * 10) / 10
-
-    db.academicians[acadIndex].reviews = newReviewsCount
-    db.academicians[acadIndex].rating = newRating
-
-    // Store review item details in academician profile
-    if (!db.academicians[acadIndex].reviewsList) {
-      db.academicians[acadIndex].reviewsList = []
-    }
-    db.academicians[acadIndex].reviewsList.push({
-      studentName: studentName || 'Anonim Öğrenci',
-      rating: Number(rating),
-      reviewText: reviewText || '',
-      date: new Date().toLocaleDateString('tr-TR')
-    })
-
-    // Mark booking as reviewed
-    if (bookingIndex !== -1) {
-      db.bookings[bookingIndex].reviewed = true
-      db.bookings[bookingIndex].status = 'Tamamlandı'
-    }
-
-    writeDb(db)
-
-    return NextResponse.json({ success: true, academician: db.academicians[acadIndex] })
+    // Return success
+    return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json(
       { error: 'Değerlendirme eklenirken hata oluştu.' },
@@ -118,4 +159,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

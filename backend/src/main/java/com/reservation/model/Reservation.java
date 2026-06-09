@@ -36,8 +36,18 @@ public class Reservation {
 
     private String description;
 
+    private String meetingUrl;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public String getMeetingUrl() {
+        return meetingUrl;
+    }
+
+    public void setMeetingUrl(String meetingUrl) {
+        this.meetingUrl = meetingUrl;
+    }
 
     public Long getId() {
         return id;

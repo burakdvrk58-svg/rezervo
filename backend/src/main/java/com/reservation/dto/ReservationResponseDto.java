@@ -18,7 +18,25 @@ public class ReservationResponseDto {
     private LocalTime endTime;
     private ReservationStatus status;
     private String description;
+    private String meetingUrl;
+    private boolean reviewed;
     private LocalDateTime createdAt;
+
+    public String getMeetingUrl() {
+        return meetingUrl;
+    }
+
+    public void setMeetingUrl(String meetingUrl) {
+        this.meetingUrl = meetingUrl;
+    }
+
+    public boolean isReviewed() {
+        return reviewed;
+    }
+
+    public void setReviewed(boolean reviewed) {
+        this.reviewed = reviewed;
+    }
 
     public Long getId() {
         return id;
