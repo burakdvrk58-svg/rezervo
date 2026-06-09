@@ -64,11 +64,8 @@ export function Navbar() {
 
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-sm shadow-primary/30">
-            <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+          <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm">
+            <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
           </div>
           <div>
             <p className="text-base font-bold leading-none text-foreground">Rezervo</p>

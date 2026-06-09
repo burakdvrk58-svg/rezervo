@@ -270,8 +270,8 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-white/5 backdrop-blur-[15px] bg-black/45">
         <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Sparkles className="w-4.5 h-4.5 text-white" />
+            <div className="relative w-8 h-8 overflow-hidden rounded-lg bg-slate-950 border border-white/10 shadow-lg">
+              <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
             </div>
             <span className="font-bold text-white text-lg tracking-tight">rezervo</span>
           </Link>
@@ -788,8 +788,8 @@ export default function LandingPage() {
               <div className="w-48 h-48 md:w-56 md:h-56 rounded-full border border-white/10 border-dashed absolute animate-spin duration-[15s] reverse" />
 
               {/* Central Rezervo Logo */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/20 z-10">
-                <Sparkles className="w-8 h-8 text-white animate-pulse" />
+              <div className="relative w-16 h-16 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center shadow-xl shadow-blue-500/20 z-10 overflow-hidden">
+                <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
               </div>
 
               {/* Orbiting Icons */}

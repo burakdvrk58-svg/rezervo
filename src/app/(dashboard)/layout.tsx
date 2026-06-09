@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Calendar,
   LayoutDashboard,
   Clock,
   Settings,
@@ -163,8 +162,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Logo */}
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-2.5 px-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-sm shadow-primary/30">
-                <Calendar className="h-5 w-5 text-white" />
+              <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm shrink-0">
+                <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
               </div>
               <div>
                 <p className="text-base font-bold leading-none text-slate-900 font-sans tracking-tight">Rezervo</p>
@@ -253,8 +252,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   {/* Top Bar Logo & Close button */}
                   <div className="flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-                        <Calendar className="h-5 w-5 text-white" />
+                      <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-slate-950 border border-slate-800/80 shadow-sm shrink-0">
+                        <img src="/images/logo.png" alt="Rezervo Logo" className="h-full w-full object-cover scale-[1.2]" />
                       </div>
                       <div>
                         <p className="text-base font-bold leading-none text-slate-900">Rezervo</p>
