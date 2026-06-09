@@ -12,11 +12,19 @@ export default function CustomerMessagesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSending, setIsSending] = useState(false)
+  const [studentId, setStudentId] = useState<string>('u-student')
   
   const chatEndRef = useRef<HTMLDivElement>(null)
   const pollIntervalRef = useRef<any>(null)
 
-  const studentId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-student') : 'u-student'
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedId = localStorage.getItem('rezervo_user_id')
+      if (storedId) {
+        setStudentId(storedId)
+      }
+    }
+  }, [])
 
   const fetchContactsAndMessages = async (selectFirst = false) => {
     try {
@@ -48,11 +56,13 @@ export default function CustomerMessagesPage() {
     }
   }
 
-  // Load contacts and select first contact on mount
+  // Load contacts and select first contact on mount or when studentId changes
   useEffect(() => {
     document.title = 'Mesajlarım | Rezervo'
-    fetchContactsAndMessages(true)
-  }, [])
+    if (studentId) {
+      fetchContactsAndMessages(true)
+    }
+  }, [studentId])
 
   // Poll current thread and contact list for new messages
   useEffect(() => {
@@ -230,9 +240,16 @@ export default function CustomerMessagesPage() {
                         }`}
                       >
                         <p className="font-medium">{msg.content}</p>
-                        <span className={`block text-[9px] mt-1.5 text-right font-medium ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
-                          {msg.timestamp}
-                        </span>
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          {msg.isAI && (
+                            <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold ${isMe ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'}`}>
+                              🤖 AI Asistanı
+                            </span>
+                          )}
+                          <span className={`block text-[9px] ml-auto font-medium ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
+                            {msg.timestamp}
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
                   )

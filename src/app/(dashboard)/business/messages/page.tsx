@@ -12,11 +12,67 @@ export default function BusinessMessagesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSending, setIsSending] = useState(false)
+  const [aiAssistantActive, setAiAssistantActive] = useState(false)
+  const [academicianData, setAcademicianData] = useState<any>(null)
   
   const chatEndRef = useRef<HTMLDivElement>(null)
   const pollIntervalRef = useRef<any>(null)
 
-  const academicianId = typeof window !== 'undefined' ? (localStorage.getItem('rezervo_user_id') || 'u-academician') : 'u-academician'
+  const [academicianId, setAcademicianId] = useState<string>('u-academician')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedId = localStorage.getItem('rezervo_user_id')
+      if (storedId) {
+        setAcademicianId(storedId)
+      }
+    }
+  }, [])
+
+  const loadAcademicianConfig = async () => {
+    try {
+      const email = typeof window !== 'undefined' ? localStorage.getItem('rezervo_user_email') : null
+      const res = await fetch('/api/academicians')
+      if (res.ok) {
+        const data = await res.json()
+        const currentAcad = data.academicians?.find((a: any) => a.email === email)
+        if (currentAcad) {
+          setAcademicianData(currentAcad)
+          setAiAssistantActive(currentAcad.aiAssistantActive || false)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load academician configurations:', err)
+    }
+  }
+
+  const handleToggleAiAssistant = async () => {
+    if (!academicianData) return
+    const nextVal = !aiAssistantActive
+    setAiAssistantActive(nextVal)
+    try {
+      const res = await fetch('/api/academicians', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: academicianData.id,
+          aiAssistantActive: nextVal
+        })
+      })
+      if (!res.ok) {
+        setAiAssistantActive(!nextVal)
+      } else {
+        const updated = await res.json()
+        if (updated.success && updated.academician) {
+          setAcademicianData(updated.academician)
+          setAiAssistantActive(updated.academician.aiAssistantActive)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle AI assistant:', err)
+      setAiAssistantActive(!nextVal)
+    }
+  }
 
   const fetchContactsAndMessages = async (selectFirst = false) => {
     try {
@@ -48,11 +104,14 @@ export default function BusinessMessagesPage() {
     }
   }
 
-  // Load contacts and select first contact on mount
+  // Load contacts and select first contact on mount or when academicianId changes
   useEffect(() => {
     document.title = 'Mesajlarım | Akademisyen Paneli'
-    fetchContactsAndMessages(true)
-  }, [])
+    if (academicianId) {
+      fetchContactsAndMessages(true)
+      loadAcademicianConfig()
+    }
+  }, [academicianId])
 
   // Poll current thread and contact list for new messages
   useEffect(() => {
@@ -117,6 +176,35 @@ export default function BusinessMessagesPage() {
       
       {/* ── Contacts Sidebar ── */}
       <div className="flex w-80 shrink-0 flex-col border-r border-slate-200 bg-slate-50/50">
+        
+        {/* Yapay Zeka Asistanı Toggle Section */}
+        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-violet-50/70 via-purple-50/40 to-indigo-50/70">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${aiAssistantActive ? 'bg-purple-600 text-white shadow-sm shadow-purple-500/30' : 'bg-slate-200 text-slate-500'}`}>
+                <span className="text-sm">🤖</span>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-slate-800">Yapay Zeka Asistanı</p>
+                <p className="text-[9px] font-medium text-slate-500 mt-0.5">
+                  {aiAssistantActive ? 'Aktif - Hoca Modu' : 'Pasif - Elle Yanıtla'}
+                </p>
+              </div>
+            </div>
+            
+            {/* Custom switch toggle */}
+            <button
+              onClick={handleToggleAiAssistant}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${aiAssistantActive ? 'bg-purple-600' : 'bg-slate-300'}`}
+              type="button"
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${aiAssistantActive ? 'translate-x-4' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+        </div>
+
         {/* Search */}
         <div className="p-4 border-b border-slate-200 bg-white">
           <div className="relative">
@@ -230,9 +318,16 @@ export default function BusinessMessagesPage() {
                         }`}
                       >
                         <p className="font-medium">{msg.content}</p>
-                        <span className={`block text-[9px] mt-1.5 text-right font-medium ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
-                          {msg.timestamp}
-                        </span>
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          {msg.isAI && (
+                            <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold ${isMe ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'}`}>
+                              🤖 AI Asistanı
+                            </span>
+                          )}
+                          <span className={`block text-[9px] ml-auto font-medium ${isMe ? 'text-white/70' : 'text-slate-400'}`}>
+                            {msg.timestamp}
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
                   )

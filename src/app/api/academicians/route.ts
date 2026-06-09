@@ -18,11 +18,11 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const { id, slots } = await request.json()
+    const { id, slots, aiAssistantActive } = await request.json()
 
-    if (!id || !Array.isArray(slots)) {
+    if (!id) {
       return NextResponse.json(
-        { error: 'Kimlik (ID) ve slot listesi gereklidir.' },
+        { error: 'Kimlik (ID) gereklidir.' },
         { status: 400 }
       )
     }
@@ -37,13 +37,20 @@ export async function PUT(request: Request) {
       )
     }
 
-    db.academicians[index].slots = slots
+    if (Array.isArray(slots)) {
+      db.academicians[index].slots = slots
+    }
+
+    if (typeof aiAssistantActive === 'boolean') {
+      db.academicians[index].aiAssistantActive = aiAssistantActive
+    }
+
     writeDb(db)
 
     return NextResponse.json({ success: true, academician: db.academicians[index] })
   } catch (error) {
     return NextResponse.json(
-      { error: 'Müsaitlik saatleri güncellenirken hata oluştu.' },
+      { error: 'Bilgiler güncellenirken hata oluştu.' },
       { status: 500 }
     )
   }

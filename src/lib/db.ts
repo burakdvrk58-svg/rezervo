@@ -66,7 +66,8 @@ function ensureDb() {
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces',
         tag: 'Yapay Zeka & Bilgisayarlı Görme',
         amenities: ['Birebir Görüşme', 'Tez Danışmanlığı', '15 Dk Görüşme'],
-        slots: ['09:00 - 09:15', '09:15 - 09:30', '09:30 - 09:45', '10:00 - 10:15', '10:15 - 10:30', '10:30 - 10:45', '11:00 - 11:15', '11:15 - 11:30']
+        slots: ['09:00 - 09:15', '09:15 - 09:30', '09:30 - 09:45', '10:00 - 10:15', '10:15 - 10:30', '10:30 - 10:45', '11:00 - 11:15', '11:15 - 11:30'],
+        aiAssistantActive: false
       },
       {
         id: 'acad-2',
@@ -295,6 +296,18 @@ function ensureDb() {
         if (!current.notifications) {
           current.notifications = defaultData.notifications
           modified = true
+        }
+        if (!current.academicians) {
+          current.academicians = defaultData.academicians
+          modified = true
+        } else {
+          current.academicians = current.academicians.map((a: any) => {
+            if (a.aiAssistantActive === undefined) {
+              modified = true
+              return { ...a, aiAssistantActive: false }
+            }
+            return a
+          })
         }
         if (modified) {
           fs.writeFileSync(DB_FILE, JSON.stringify(current, null, 2), 'utf-8')
