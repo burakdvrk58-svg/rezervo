@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar,
@@ -50,9 +50,40 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState<'student' | 'academician'>('student')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [hoveredCase, setHoveredCase] = useState<number | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [userRole, setUserRole] = useState('')
   
   // Interactive Cursor Position
   const [whyMousePos, setWhyMousePos] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const loggedIn = localStorage.getItem('rezervo_logged_in') === 'true'
+      const role = localStorage.getItem('rezervo_user_role') || ''
+      setIsLoggedIn(loggedIn)
+      setUserRole(role)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('rezervo_logged_in')
+      localStorage.removeItem('rezervo_user_role')
+      localStorage.removeItem('rezervo_user_name')
+      localStorage.removeItem('rezervo_user_email')
+      localStorage.removeItem('rezervo_user_id')
+      setIsLoggedIn(false)
+      setUserRole('')
+    }
+  }
+
+  const getDashboardLink = () => {
+    if (userRole === 'admin') return { label: 'Yönetici Paneli', href: '/admin' }
+    if (userRole === 'business') return { label: 'Akademisyen Paneli', href: '/business' }
+    return { label: 'Öğrenci Paneli', href: '/customer' }
+  }
+
+  const dashboard = getDashboardLink()
 
   const handleWhyMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -63,7 +94,7 @@ export default function LandingPage() {
   }
 
   const handlePrimaryClick = () => {
-    window.location.href = '/register'
+    window.location.href = isLoggedIn ? dashboard.href : '/register'
   }
 
   const handleSecondaryClick = () => {
@@ -250,29 +281,53 @@ export default function LandingPage() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <BorderRotate
-              borderRadius={8}
-              borderWidth={1.5}
-              backgroundColor="#000000"
-              animationSpeed={6}
-              className="inline-block transition-all duration-300 hover:scale-105"
-            >
-              <Link href="/login" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors block">
-                Giriş Yap
-              </Link>
-            </BorderRotate>
-            
-            <BorderRotate
-              borderRadius={8}
-              borderWidth={1.5}
-              backgroundColor="#000000"
-              animationSpeed={4}
-              className="inline-block transition-all duration-300 hover:scale-105"
-            >
-              <Link href="/register" className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-black hover:bg-slate-200 transition-all duration-200 block">
-                Kayıt Ol
-              </Link>
-            </BorderRotate>
+            {isLoggedIn ? (
+              <>
+                <BorderRotate
+                  borderRadius={8}
+                  borderWidth={1.5}
+                  backgroundColor="#000000"
+                  animationSpeed={6}
+                  className="inline-block transition-all duration-300 hover:scale-105"
+                >
+                  <Link href={dashboard.href} className="px-4 py-2 text-sm text-blue-400 font-bold hover:text-blue-300 transition-colors block">
+                    {dashboard.label}
+                  </Link>
+                </BorderRotate>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2.5 text-sm font-semibold rounded-lg bg-red-950/20 text-red-400 border border-red-900/30 hover:bg-red-900/10 transition-all duration-200 cursor-pointer"
+                >
+                  Çıkış Yap
+                </button>
+              </>
+            ) : (
+              <>
+                <BorderRotate
+                  borderRadius={8}
+                  borderWidth={1.5}
+                  backgroundColor="#000000"
+                  animationSpeed={6}
+                  className="inline-block transition-all duration-300 hover:scale-105"
+                >
+                  <Link href="/login" className="px-4 py-2 text-sm text-slate-300 hover:text-white transition-colors block">
+                    Giriş Yap
+                  </Link>
+                </BorderRotate>
+                
+                <BorderRotate
+                  borderRadius={8}
+                  borderWidth={1.5}
+                  backgroundColor="#000000"
+                  animationSpeed={4}
+                  className="inline-block transition-all duration-300 hover:scale-105"
+                >
+                  <Link href="/register" className="px-5 py-2.5 text-sm font-semibold rounded-lg bg-white text-black hover:bg-slate-200 transition-all duration-200 block">
+                    Kayıt Ol
+                  </Link>
+                </BorderRotate>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -294,8 +349,21 @@ export default function LandingPage() {
               <a href="#why" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Neden Biz?</a>
               <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Sanal Panel</a>
               <a href="#integrations" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Entegrasyonlar</a>
-              <Link href="/login" className="text-center py-3 text-slate-300 border border-white/10 rounded-lg">Giriş Yap</Link>
-              <Link href="/register" className="text-center py-3 bg-white text-black font-semibold rounded-lg">Ücretsiz Başla</Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href={dashboard.href} className="text-center py-3 text-blue-400 border border-blue-900/30 rounded-lg font-semibold bg-blue-950/20">
+                    {dashboard.label}
+                  </Link>
+                  <button onClick={handleLogout} className="text-center py-3 text-red-400 border border-red-900/30 rounded-lg font-semibold bg-red-950/20 cursor-pointer">
+                    Çıkış Yap
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 text-slate-300 border border-white/10 rounded-lg">Giriş Yap</Link>
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 bg-white text-black font-semibold rounded-lg">Ücretsiz Başla</Link>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
