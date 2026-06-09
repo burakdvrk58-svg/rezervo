@@ -238,6 +238,42 @@ function ensureDb() {
         image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces',
         price: 'Ücretsiz'
       }
+    ],
+    messages: [
+      {
+        id: 'msg-1',
+        senderId: 'u-student',
+        receiverId: 'u-academician',
+        content: 'Merhabalar Albert hocam, proje raporunu size e-posta üzerinden ilettim. Randevu saatimizde inceleyebilir miyiz?',
+        timestamp: '08 Haziran Pazartesi, 14:20'
+      },
+      {
+        id: 'msg-2',
+        senderId: 'u-academician',
+        receiverId: 'u-student',
+        content: 'Selam Ahmet. Raporu aldım ve göz gezdirdim. Görüşmede detayları tartışırız, hazır gel.',
+        timestamp: '08 Haziran Pazartesi, 15:45'
+      }
+    ],
+    notifications: [
+      {
+        id: 'notif-1',
+        userId: 'u-academician',
+        role: 'business',
+        title: 'Yeni İstek',
+        desc: 'Ahmet Yılmaz bitirme projesi için randevu talebi gönderdi.',
+        time: '3s önce',
+        unread: true
+      },
+      {
+        id: 'notif-2',
+        userId: 'u-student',
+        role: 'customer',
+        title: 'Randevu Onaylandı',
+        desc: 'Prof. Dr. Albert Ali Salah randevunuzu onayladı.',
+        time: '1s önce',
+        unread: true
+      }
     ]
   }
 
@@ -248,8 +284,21 @@ function ensureDb() {
     // Merge or verify users & bookings & universities key exist
     try {
       const current = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'))
+      let modified = false
       if (!current.users || !current.bookings || !current.universities) {
         fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf-8')
+      } else {
+        if (!current.messages) {
+          current.messages = defaultData.messages
+          modified = true
+        }
+        if (!current.notifications) {
+          current.notifications = defaultData.notifications
+          modified = true
+        }
+        if (modified) {
+          fs.writeFileSync(DB_FILE, JSON.stringify(current, null, 2), 'utf-8')
+        }
       }
     } catch {
       fs.writeFileSync(DB_FILE, JSON.stringify(defaultData, null, 2), 'utf-8')

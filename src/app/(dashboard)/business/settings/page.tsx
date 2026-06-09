@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Mail, GraduationCap, Award, Save, CheckCircle, Image } from 'lucide-react'
+import { User, Mail, GraduationCap, Award, Save, CheckCircle, Image, Calendar, RefreshCw, Check } from 'lucide-react'
 
 export default function BusinessSettingsPage() {
   const [name, setName] = useState('')
@@ -14,6 +14,13 @@ export default function BusinessSettingsPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Calendar Sync States
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false)
+  const [isOutlookConnected, setIsOutlookConnected] = useState(false)
+  const [showOAuthModal, setShowOAuthModal] = useState<'google' | 'outlook' | null>(null)
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [syncSettings, setSyncSettings] = useState({ autoSync: true, blockBusy: true })
 
   useEffect(() => {
     document.title = 'Akademisyen Ayarları | Rezervo'
@@ -211,6 +218,233 @@ export default function BusinessSettingsPage() {
           </motion.button>
         </div>
       </form>
+
+      {/* ── Calendar Sync Panel ── */}
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <Calendar className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Takvim Senkronizasyonu</h2>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Akademik görüşmelerinizi Google veya Outlook takviminize otomatik ekleyin ve dolu saatlerinizi kapatın.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Google Connection */}
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">📅</span>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">Google Calendar</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Google Takvim Entegrasyonu</span>
+                </div>
+              </div>
+              {isGoogleConnected && (
+                <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  Bağlandı
+                </span>
+              )}
+            </div>
+            
+            <button
+              type="button"
+              onClick={() => {
+                if (isGoogleConnected) {
+                  setIsGoogleConnected(false)
+                } else {
+                  setShowOAuthModal('google')
+                }
+              }}
+              className={`w-full rounded-xl py-2.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isGoogleConnected
+                  ? 'border border-red-200 bg-white text-red-600 hover:bg-red-50'
+                  : 'bg-[#4285F4] text-white shadow shadow-blue-500/10 hover:bg-[#3574de]'
+              }`}
+            >
+              {isGoogleConnected ? 'Bağlantıyı Kes' : 'Google Takvim\'i Bağla'}
+            </button>
+          </div>
+
+          {/* Outlook Connection */}
+          <div className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">📧</span>
+                <div>
+                  <span className="text-xs font-bold text-slate-900 block">Outlook Calendar</span>
+                  <span className="text-[10px] text-slate-400 font-medium">Microsoft Outlook Entegrasyonu</span>
+                </div>
+              </div>
+              {isOutlookConnected && (
+                <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700 flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  Bağlandı
+                </span>
+              )}
+            </div>
+            
+            <button
+              type="button"
+              onClick={() => {
+                if (isOutlookConnected) {
+                  setIsOutlookConnected(false)
+                } else {
+                  setShowOAuthModal('outlook')
+                }
+              }}
+              className={`w-full rounded-xl py-2.5 text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isOutlookConnected
+                  ? 'border border-red-200 bg-white text-red-600 hover:bg-red-50'
+                  : 'bg-[#0078d4] text-white shadow shadow-blue-600/10 hover:bg-[#006cc0]'
+              }`}
+            >
+              {isOutlookConnected ? 'Bağlantıyı Kes' : 'Outlook Takvim\'i Bağla'}
+            </button>
+          </div>
+        </div>
+
+        {(isGoogleConnected || isOutlookConnected) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="border-t border-slate-100 pt-5 space-y-4"
+          >
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Entegrasyon Tercihleri</span>
+              <div className="space-y-2.5">
+                {/* Auto Sync Toggle */}
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">Rezervasyonları Eşitle</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Yeni randevularınız otomatik olarak takviminize işlenir.</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={syncSettings.autoSync}
+                    onChange={(e) => setSyncSettings((prev) => ({ ...prev, autoSync: e.target.checked }))}
+                    className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                </label>
+
+                {/* Block Busy Toggle */}
+                <label className="flex items-center justify-between cursor-pointer">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">Dolu Saatleri Kapat</span>
+                    <span className="text-[10px] text-slate-400 font-medium">Kişisel takviminizdeki meşgul saatler Rezervo'da kapatılır.</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={syncSettings.blockBusy}
+                    onChange={(e) => setSyncSettings((prev) => ({ ...prev, blockBusy: e.target.checked }))}
+                    className="h-4.5 w-4.5 rounded border-slate-300 text-primary focus:ring-primary"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Mock events feed */}
+            <div className="space-y-2 bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <RefreshCw className="h-3 w-3 animate-spin text-slate-400" />
+                Aktif Takvim Etkinlikleri (Senkronize)
+              </span>
+              <div className="space-y-1.5 mt-2.5">
+                <div className="flex justify-between items-center text-xs font-semibold bg-white p-2 rounded-xl border border-slate-100">
+                  <span className="text-slate-700">🎓 Bölüm Akademik Kurul Toplantısı</span>
+                  <span className="text-[10px] text-slate-400">10:00 - 10:30 (Rezervo'da Kapatıldı)</span>
+                </div>
+                <div className="flex justify-between items-center text-xs font-semibold bg-white p-2 rounded-xl border border-slate-100">
+                  <span className="text-slate-700">🔬 AB Proje Değerlendirme Oturumu</span>
+                  <span className="text-[10px] text-slate-400">14:00 - 15:00 (Rezervo'da Kapatıldı)</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* ── OAuth Login Simulation Modal ── */}
+      <AnimatePresence>
+        {showOAuthModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowOAuthModal(null)}
+              className="absolute inset-0 bg-black"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-sm rounded-3xl bg-white p-6 shadow-2xl text-center border border-slate-100"
+            >
+              <div className="flex justify-center mb-4 text-2xl">
+                {showOAuthModal === 'google' ? '📅' : '📧'}
+              </div>
+              <h3 className="text-base font-bold text-slate-900">
+                {showOAuthModal === 'google' ? 'Google Account Authorization' : 'Microsoft Account Authorization'}
+              </h3>
+              <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
+                Rezervo'nun takviminizi görüntülemesine, yeni randevular eklemesine ve meşgul zamanlarınızı eşitlemesine izin vermek üzeresiniz.
+              </p>
+
+              <div className="my-5 rounded-2xl bg-slate-50 p-3.5 text-left text-[10px] font-semibold text-slate-600 space-y-1.5 border border-slate-100">
+                <p className="flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  Takvim etkinliklerini listeleme ve okuma
+                </p>
+                <p className="flex items-center gap-1.5">
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  Yeni randevuları takvime kaydetme
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowOAuthModal(null)}
+                  disabled={isConnecting}
+                  className="w-1/2 rounded-xl border border-slate-200 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  İptal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsConnecting(true)
+                    setTimeout(() => {
+                      setIsConnecting(false)
+                      if (showOAuthModal === 'google') {
+                        setIsGoogleConnected(true)
+                      } else {
+                        setIsOutlookConnected(true)
+                      }
+                      setShowOAuthModal(null)
+                    }, 1200)
+                  }}
+                  disabled={isConnecting}
+                  className="w-1/2 rounded-xl bg-primary py-3 text-xs font-bold text-white shadow-md shadow-primary/20 hover:bg-primary/95 flex justify-center items-center"
+                >
+                  {isConnecting ? (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    'İzin Ver ve Bağla'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -30,11 +30,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showNotifications, setShowNotifications] = useState(false)
   
   const [userName, setUserName] = useState('')
+  const [userId, setUserId] = useState('')
 
   useEffect(() => {
     const loadUser = () => {
       if (typeof window !== 'undefined') {
         setUserName(localStorage.getItem('rezervo_user_name') || '')
+        setUserId(localStorage.getItem('rezervo_user_id') || '')
       }
     }
     loadUser()
@@ -46,6 +48,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (typeof window !== 'undefined') {
       localStorage.removeItem('rezervo_logged_in')
       localStorage.removeItem('rezervo_user_role')
+      localStorage.removeItem('rezervo_user_name')
+      localStorage.removeItem('rezervo_user_email')
+      localStorage.removeItem('rezervo_user_id')
     }
   }
 
@@ -68,6 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         menuItems: [
           { label: 'Genel Bakış', href: '/business', icon: LayoutDashboard },
           { label: 'Görüşme İstekleri', href: '/business/requests', icon: ClipboardList },
+          { label: 'Mesajlar', href: '/business/messages', icon: MessageSquare },
           { label: 'Akademik Analitik', href: '/business/analytics', icon: BarChart3 },
           { label: 'Hesap Ayarları', href: '/business/settings', icon: Settings },
         ]
@@ -101,6 +107,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: 'Genel Bakış', href: '/customer', icon: LayoutDashboard },
         { label: 'Görüşmelerim', href: '/customer/reservations', icon: Clock },
         { label: 'Akademisyen Bul', href: '/search', icon: Search },
+        { label: 'Mesajlar', href: '/customer/messages', icon: MessageSquare },
         { label: 'Hesap Ayarları', href: '/customer/settings', icon: Settings },
       ]
     }
@@ -109,43 +116,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { roleKey, roleLabel, userRole, userDisplayName, userAvatar, menuItems } = getRoleInfo()
 
   useEffect(() => {
-    const loadNotifications = () => {
-      if (typeof window !== 'undefined') {
-        const all = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
-        const filtered = all.filter((n: any) => n.role === roleKey)
-        if (filtered.length === 0) {
-          const defaults = roleKey === 'business'
-            ? [
-                { id: 'd-1', title: 'Yeni İstek', desc: 'Ahmet Yılmaz görüşme talebi gönderdi.', time: '3s önce', unread: true, role: 'business' },
-                { id: 'd-2', title: 'Sistem Güncellemesi', desc: 'Randevu takviminiz aktif edildi.', time: 'Dün', unread: false, role: 'business' }
-              ]
-            : [
-                { id: 'd-3', title: 'Randevu Onaylandı', desc: 'Prof. Dr. Albert Ali Salah randevunuzu onayladı.', time: '1s önce', unread: true, role: 'customer' },
-                { id: 'd-4', title: 'Hoş Geldiniz', desc: 'Rezervo akademisyen danışmanlık sistemine hoş geldiniz.', time: 'Dün', unread: false, role: 'customer' }
-              ]
-          setNotifications(defaults)
-          if (all.length === 0) {
-            localStorage.setItem('rezervo_notifications', JSON.stringify(defaults))
-          }
-        } else {
-          setNotifications(filtered)
+    const fetchNotifications = async () => {
+      if (!userId) return
+      try {
+        const res = await fetch(`/api/notifications?userId=${userId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setNotifications(data)
         }
+      } catch (err) {
+        console.error('Failed to fetch notifications:', err)
       }
     }
 
-    loadNotifications()
-    window.addEventListener('storage', loadNotifications)
-    return () => window.removeEventListener('storage', loadNotifications)
-  }, [roleKey])
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 10000)
+    return () => clearInterval(interval)
+  }, [userId])
 
   const unreadCount = notifications.filter((n) => n.unread).length
 
-  const markAllRead = () => {
-    if (typeof window !== 'undefined') {
-      const all = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
-      const updated = all.map((n: any) => n.role === roleKey ? { ...n, unread: false } : n)
-      localStorage.setItem('rezervo_notifications', JSON.stringify(updated))
-      window.dispatchEvent(new Event('storage'))
+  const markAllRead = async () => {
+    if (!userId || !roleKey) return
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, role: roleKey })
+      })
+      if (res.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
+      }
+    } catch (err) {
+      console.error('Failed to mark all read:', err)
     }
   }
 

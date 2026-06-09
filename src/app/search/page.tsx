@@ -24,6 +24,9 @@ function SearchContent() {
   
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  
+  // Reviews toggle state
+  const [expandedReviewsId, setExpandedReviewsId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -280,6 +283,7 @@ function SearchContent() {
                             const availabilityPercent = totalSlots > 0 ? (availableCount / totalSlots) * 100 : 0
 
                             return (
+                              <>
                               <motion.div
                                 key={acad.id}
                                 layout
@@ -337,17 +341,60 @@ function SearchContent() {
                                   </div>
                                 </div>
 
-                                {/* Selection Action */}
-                                <div className="flex flex-col items-center shrink-0 border-t border-slate-100 pt-4 md:border-t-0 md:pt-0">
-                                  <Link
-                                    href={`/checkout?academicianId=${acad.id}&university=${encodeURIComponent(selectedUniv?.name || '')}`}
-                                    className="w-full md:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-3 text-xs font-bold text-white shadow-sm shadow-primary/20 hover:bg-primary/95 hover:shadow-md transition-all active:scale-97 cursor-pointer"
-                                  >
-                                    Seç ve Randevu Al
-                                    <ArrowRight className="h-4 w-4" />
-                                  </Link>
-                                </div>
-                              </motion.div>
+                                 {/* Selection Action */}
+                                 <div className="flex flex-col md:flex-row items-center gap-2 shrink-0 border-t border-slate-100 pt-4 md:border-t-0 md:pt-0">
+                                   <button
+                                     type="button"
+                                     onClick={() => setExpandedReviewsId(expandedReviewsId === acad.id ? null : acad.id)}
+                                     className="w-full md:w-auto inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer"
+                                   >
+                                     {expandedReviewsId === acad.id ? 'Yorumları Kapat' : 'Yorumları Gör'}
+                                   </button>
+                                   <Link
+                                     href={`/checkout?academicianId=${acad.id}&university=${encodeURIComponent(selectedUniv?.name || '')}`}
+                                     className="w-full md:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-3 text-xs font-bold text-white shadow-sm shadow-primary/20 hover:bg-primary/95 hover:shadow-md transition-all active:scale-97 cursor-pointer"
+                                   >
+                                     Seç ve Randevu Al
+                                     <ArrowRight className="h-4 w-4" />
+                                   </Link>
+                                 </div>
+                               </motion.div>
+
+                               {expandedReviewsId === acad.id && (
+                                 <motion.div
+                                   initial={{ opacity: 0, height: 0 }}
+                                   animate={{ opacity: 1, height: 'auto' }}
+                                   exit={{ opacity: 0, height: 0 }}
+                                   className="rounded-3xl border border-slate-200 bg-white p-5 -mt-3 shadow-inner space-y-3"
+                                 >
+                                   <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                     Öğrenci Değerlendirmeleri ({acad.reviewsList?.length || 0})
+                                   </h4>
+                                   <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                                     {acad.reviewsList && acad.reviewsList.length > 0 ? (
+                                       acad.reviewsList.map((rev: any, rIdx: number) => (
+                                         <div key={rIdx} className="bg-slate-50 rounded-2xl p-3 border border-slate-100 text-xs">
+                                           <div className="flex justify-between items-center mb-1">
+                                             <span className="font-bold text-slate-800">{rev.studentName}</span>
+                                             <span className="text-[10px] text-slate-400 font-medium">{rev.date}</span>
+                                           </div>
+                                           <div className="flex items-center gap-0.5 text-amber-500 mb-1.5">
+                                             {Array.from({ length: 5 }).map((_, sIdx) => (
+                                               <span key={sIdx} className="text-xs">
+                                                 {sIdx < rev.rating ? '★' : '☆'}
+                                               </span>
+                                             ))}
+                                           </div>
+                                           <p className="text-slate-600 leading-normal font-medium italic">"{rev.reviewText}"</p>
+                                         </div>
+                                       ))
+                                     ) : (
+                                       <p className="text-xs text-slate-400 italic">Henüz değerlendirme yapılmamış.</p>
+                                     )}
+                                   </div>
+                                 </motion.div>
+                               )}
+                              </>
                             )
                           })}
 

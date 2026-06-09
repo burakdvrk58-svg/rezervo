@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ClipboardList,
@@ -11,7 +12,8 @@ import {
   Clock,
   Check,
   Settings,
-  BookOpen
+  BookOpen,
+  Video
 } from 'lucide-react'
 
 type FilterStatus = 'all' | 'Beklemede' | 'Onaylandı' | 'Reddedildi'
@@ -103,22 +105,6 @@ export default function BusinessRequestsPage() {
     fetchData()
   }, [])
 
-  const addNotification = (title: string, desc: string, role: string) => {
-    if (typeof window !== 'undefined') {
-      const current = JSON.parse(localStorage.getItem('rezervo_notifications') || '[]')
-      const newNotif = {
-        id: `notif-${Date.now()}`,
-        title,
-        desc,
-        time: 'Şimdi',
-        unread: true,
-        role
-      }
-      localStorage.setItem('rezervo_notifications', JSON.stringify([newNotif, ...current]))
-      window.dispatchEvent(new Event('storage'))
-    }
-  }
-
   const handleAction = async (id: string, newStatus: 'Onaylandı' | 'Reddedildi') => {
     const action = newStatus === 'Onaylandı' ? 'approve' : 'reject'
     try {
@@ -129,11 +115,18 @@ export default function BusinessRequestsPage() {
       })
       if (res.ok) {
         const targetReq = list.find(item => item.id === id)
-        addNotification(
-          newStatus === 'Onaylandı' ? 'Randevu Onaylandı' : 'Randevu Reddedildi',
-          `${userName} ile ${targetReq?.date || ''} tarihindeki görüşmeniz ${newStatus.toLowerCase()} olarak güncellendi.`,
-          'customer'
-        )
+        
+        // Dynamic Notification API Call
+        await fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: targetReq?.userId || 'u-student',
+            role: 'customer',
+            title: newStatus === 'Onaylandı' ? 'Randevu Onaylandı' : 'Randevu Reddedildi',
+            desc: `${userName} ile ${targetReq?.date || ''} tarihindeki görüşmeniz ${newStatus.toLowerCase()} olarak güncellendi.`
+          })
+        })
 
         setList((prev) =>
           prev.map((item) => {
@@ -339,12 +332,21 @@ export default function BusinessRequestsPage() {
                           </div>
                         )}
                         {req.status === 'Onaylandı' && (
-                          <button
-                            onClick={() => handleAction(req.id, 'Reddedildi')}
-                            className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 cursor-pointer"
-                          >
-                            Görüşmeyi İptal Et
-                          </button>
+                          <div className="flex flex-wrap items-center gap-2 shrink-0">
+                            <Link
+                              href={`/meeting/${req.id}`}
+                              className="inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 active:scale-95 cursor-pointer animate-pulse"
+                            >
+                              <Video className="h-4 w-4" />
+                              Görüşmeye Katıl
+                            </Link>
+                            <button
+                              onClick={() => handleAction(req.id, 'Reddedildi')}
+                              className="inline-flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-50 hover:text-red-600 cursor-pointer"
+                            >
+                              Görüşmeyi İptal Et
+                            </button>
+                          </div>
                         )}
                       </div>
                     </motion.div>

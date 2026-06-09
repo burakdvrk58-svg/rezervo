@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Layers,
@@ -12,7 +13,8 @@ import {
   MapPin,
   Calendar,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Video
 } from 'lucide-react'
 
 const TABS = [
@@ -237,7 +239,17 @@ export default function ReservationsPage() {
                   {/* Actions */}
                   <div className="flex flex-row items-center justify-center border-t border-slate-100 pt-4 md:flex-col md:items-end md:justify-center md:border-t-0 md:pt-0 gap-3 shrink-0">
                     {(res.status === 'Onaylandı' || res.status === 'Beklemede') && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {res.status === 'Onaylandı' && (
+                          <Link
+                            href={`/meeting/${res.id}`}
+                            className="inline-flex items-center justify-center gap-1 rounded-xl bg-emerald-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700 active:scale-95 cursor-pointer animate-pulse"
+                          >
+                            <Video className="h-4 w-4" />
+                            Görüşmeye Katıl
+                          </Link>
+                        )}
+
                         {res.status === 'Onaylandı' && !res.reviewed && (
                           <button
                             onClick={() => setReviewTarget(res)}
