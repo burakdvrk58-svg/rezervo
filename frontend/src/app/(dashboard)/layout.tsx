@@ -44,13 +44,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener('storage', loadUser)
   }, [])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('rezervo_logged_in')
       localStorage.removeItem('rezervo_user_role')
       localStorage.removeItem('rezervo_user_name')
       localStorage.removeItem('rezervo_user_email')
       localStorage.removeItem('rezervo_user_id')
+      localStorage.removeItem('rezervo_access_token')
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' })
+      } catch (err) {
+        console.error('Logout error:', err)
+      }
     }
   }
 

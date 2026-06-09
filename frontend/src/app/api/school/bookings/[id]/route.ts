@@ -1,21 +1,33 @@
 import { NextResponse } from 'next/server'
-import { readDb, writeDb } from '@/lib/db'
+import { cookies } from 'next/headers'
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
-    const db = readDb()
-    const initialCount = db.bookings?.length || 0
-    db.bookings = (db.bookings || []).filter((b: any) => b.id !== id)
-    
-    if (db.bookings.length === initialCount) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+    const { id: rawId } = await params
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
+
+    if (!token) {
+      return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
-    
-    writeDb(db)
+
+    // Extract numeric ID
+    const id = rawId.replace('res-', '').replace('sch-res-', '')
+
+    const res = await fetch(`http://localhost:8081/api/reservations/${id}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Rezervasyon iptal edilemedi.' }, { status: res.status })
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 })

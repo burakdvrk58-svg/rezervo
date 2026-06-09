@@ -154,6 +154,7 @@ public class ReservationService {
         dto.setId(reservation.getId());
         dto.setUserId(reservation.getUser().getId());
         dto.setUsername(reservation.getUser().getUsername());
+        dto.setUserFullName(reservation.getUser().getFullName());
         dto.setRoomId(reservation.getRoom().getId());
         dto.setRoomName(reservation.getRoom().getName());
         dto.setDate(reservation.getDate());

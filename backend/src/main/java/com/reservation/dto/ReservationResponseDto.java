@@ -10,6 +10,7 @@ public class ReservationResponseDto {
     private Long id;
     private Long userId;
     private String username;
+    private String userFullName;
     private Long roomId;
     private String roomName;
     private LocalDate date;
@@ -41,6 +42,14 @@ public class ReservationResponseDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getUserFullName() {
+        return userFullName;
+    }
+
+    public void setUserFullName(String userFullName) {
+        this.userFullName = userFullName;
     }
 
     public Long getRoomId() {

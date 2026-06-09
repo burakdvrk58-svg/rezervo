@@ -17,6 +17,21 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    // TÜM KULLANICILARI LİSTELEME — Sadece SUPER_ADMIN yapabilir
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @GetMapping
+    public ResponseEntity<java.util.List<User>> getAllUsers() {
+        return ResponseEntity.ok(userRepository.findAll());
+    }
+
+    // KULLANICI SİLME — Sadece SUPER_ADMIN yapabilir
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        userRepository.deleteById(id);
+        return ResponseEntity.ok("Kullanıcı silindi");
+    }
+
     // ROL DEĞİŞTİRME — Sadece SUPER_ADMIN yapabilir
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PutMapping("/{id}/assign-role")

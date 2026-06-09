@@ -70,10 +70,19 @@ export async function POST(request: Request) {
         token: token
       }
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: true, user: userWithoutPassword },
         { status: 200 }
       )
+
+      response.cookies.set('rezervo_access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 // 24 hours
+      })
+
+      return response
     } catch (e) {
       return NextResponse.json(
         { error: 'JWT token çözümlenemedi.' },

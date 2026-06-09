@@ -1,60 +1,82 @@
 import { NextResponse } from 'next/server'
-import { readDb, writeDb } from '@/lib/db'
+import { cookies } from 'next/headers'
 
 export async function GET() {
   try {
-    const db = readDb()
-    // Exclude passwords for safety before returning
-    const safeUsers = (db.users || []).map(({ password: _, ...u }: any) => u)
-    return NextResponse.json(safeUsers)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
+
+    if (!token) {
+      return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
+    }
+
+    const res = await fetch('http://localhost:8081/api/users', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Spring Boot kullanıcı listesini yükleyemedi.' }, { status: res.status })
+    }
+
+    const data = await res.json()
+
+    // Map backend User entities to frontend format
+    const mappedUsers = data.map((u: any) => {
+      let roleLabel = 'customer'
+      if (u.role === 'ROLE_SUPER_ADMIN') roleLabel = 'admin'
+      else if (u.role === 'ROLE_ROOM_LEADER') roleLabel = 'business'
+
+      return {
+        id: String(u.id),
+        name: u.fullName || u.username,
+        email: u.email,
+        role: roleLabel,
+        status: 'aktif'
+      }
+    })
+
+    return NextResponse.json(mappedUsers)
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Kullanıcı listesi okunurken hata oluştu.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Kullanıcı listesi yüklenirken sunucu hatası.' }, { status: 500 })
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const { id, status, role } = await request.json()
+    const { id, role } = await request.json()
 
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Kullanıcı kimliği (ID) gereklidir.' },
-        { status: 400 }
-      )
+    if (!id || !role) {
+      return NextResponse.json({ error: 'ID ve rol gereklidir.' }, { status: 400 })
     }
 
-    const db = readDb()
-    const users = db.users || []
-    const index = users.findIndex((u: any) => u.id === id)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    if (index === -1) {
-      return NextResponse.json(
-        { error: 'Kullanıcı bulunamadı.' },
-        { status: 404 }
-      )
+    if (!token) {
+      return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    if (status !== undefined) {
-      users[index].status = status
+    // Map frontend role to Spring Boot Role enum
+    let newRole = 'ROLE_USER'
+    if (role === 'admin') newRole = 'ROLE_SUPER_ADMIN'
+    else if (role === 'business') newRole = 'ROLE_ROOM_LEADER'
+
+    const res = await fetch(`http://localhost:8081/api/users/${id}/assign-role?newRole=${newRole}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Kullanıcı rolü güncellenemedi.' }, { status: res.status })
     }
 
-    if (role !== undefined) {
-      users[index].role = role
-    }
-
-    db.users = users
-    writeDb(db)
-
-    const { password: _, ...updatedUser } = users[index]
-    return NextResponse.json(updatedUser, { status: 200 })
+    return NextResponse.json({ id, role, status: 'aktif' }, { status: 200 })
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Kullanıcı güncellenirken sunucu hatası oluştu.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Kullanıcı güncellenirken sunucu hatası.' }, { status: 500 })
   }
 }
 
@@ -64,31 +86,29 @@ export async function DELETE(request: Request) {
     const id = searchParams.get('id')
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Kullanıcı kimliği (ID) gereklidir.' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Kullanıcı kimliği (ID) gereklidir.' }, { status: 400 })
     }
 
-    const db = readDb()
-    const users = db.users || []
-    const filteredUsers = users.filter((u: any) => u.id !== id)
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
 
-    if (users.length === filteredUsers.length) {
-      return NextResponse.json(
-        { error: 'Kullanıcı bulunamadı.' },
-        { status: 404 }
-      )
+    if (!token) {
+      return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    db.users = filteredUsers
-    writeDb(db)
+    const res = await fetch(`http://localhost:8081/api/users/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!res.ok) {
+      return NextResponse.json({ error: 'Kullanıcı silinemedi.' }, { status: res.status })
+    }
 
     return NextResponse.json({ success: true, message: 'Kullanıcı başarıyla silindi.' })
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Kullanıcı silinirken sunucu hatası oluştu.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Kullanıcı silinirken sunucu hatası.' }, { status: 500 })
   }
 }
