@@ -20,7 +20,8 @@ import {
   BarChart3,
   Users,
   CheckCheck,
-  MessageSquare
+  MessageSquare,
+  GraduationCap
 } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -108,6 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: 'Görüşmelerim', href: '/customer/reservations', icon: Clock },
         { label: 'Akademisyen Bul', href: '/search', icon: Search },
         { label: 'Mesajlar', href: '/customer/messages', icon: MessageSquare },
+        { label: 'Okul Portalı', href: '/customer/school', icon: GraduationCap },
         { label: 'Hesap Ayarları', href: '/customer/settings', icon: Settings },
       ]
     }

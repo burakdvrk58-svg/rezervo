@@ -47,11 +47,70 @@ function ensureDb() {
       }
     ],
     universities: [
-      { id: 'univ-1', name: 'Boğaziçi Üniversitesi', shortName: 'BOUN', logo: '🎓' },
-      { id: 'univ-2', name: 'Orta Doğu Teknik Üniversitesi', shortName: 'ODTÜ', logo: '🔬' },
-      { id: 'univ-3', name: 'İstanbul Teknik Üniversitesi', shortName: 'İTÜ', logo: '⚙️' },
-      { id: 'univ-4', name: 'Koç Üniversitesi', shortName: 'KU', logo: '🏛️' },
-      { id: 'univ-5', name: 'Bilkent Üniversitesi', shortName: 'BİLKENT', logo: '📚' }
+      {
+        id: 'univ-1', name: 'Boğaziçi Üniversitesi', shortName: 'BOUN', logo: '🎓',
+        campus: 'Bebek / İstanbul',
+        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=250&fit=crop',
+        libraryRooms: [
+          { id: 'lr-1-1', name: 'Sessiz Çalışma Odası A', capacity: '1 Kişi', description: 'Ergonomik sandalye, bireysel priz ve LED masa lambası.', floor: 'Kat 1, Doğu Kanadı', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop', rating: '4.9', type: 'silent' },
+          { id: 'lr-1-2', name: 'Grup Çalışma Odası 101', capacity: '6-8 Kişi', description: 'Akıllı tahta, projeksiyon cihazı ve beyaz tahta donanımlı.', floor: 'Kat 1, Batı Kanadı', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop', rating: '4.8', type: 'group' },
+          { id: 'lr-1-3', name: 'Proje & Tasarım Odası', capacity: '4-6 Kişi', description: 'Yüksek performanslı bilgisayarlar ve geniş çizim masaları.', floor: 'Kat 2, Orta Alan', image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=200&fit=crop', rating: '4.7', type: 'project' }
+        ],
+        classrooms: [
+          { id: 'cr-1-1', name: 'Derslik D-101', capacity: '30 Kişi', description: 'Projeksiyon, klima ve ses sistemi donanımlı modern derslik.', floor: 'Kat 1, Ana Bina', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop', rating: '4.8', type: 'lecture' },
+          { id: 'cr-1-2', name: 'Seminer Salonu S-201', capacity: '15 Kişi', description: 'U-düzen masa yerleşimi, akıllı tahta ve video konferans.', floor: 'Kat 2, Kuzey Kanadı', image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop', rating: '4.9', type: 'seminar' }
+        ]
+      },
+      {
+        id: 'univ-2', name: 'Orta Doğu Teknik Üniversitesi', shortName: 'ODTÜ', logo: '🔬',
+        campus: 'Çankaya / Ankara',
+        image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=250&fit=crop',
+        libraryRooms: [
+          { id: 'lr-2-1', name: 'Bireysel Kabin B-01', capacity: '1 Kişi', description: 'Ses yalıtımlı bireysel çalışma kabini, USB şarj portu.', floor: 'Kat 1, Merkez Kütüphane', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop', rating: '4.8', type: 'silent' },
+          { id: 'lr-2-2', name: 'Grup Odası G-102', capacity: '8-10 Kişi', description: 'Geniş toplantı masası, çift projeksiyon ve beyaz tahta.', floor: 'Kat 2, Batı Kanadı', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop', rating: '4.9', type: 'group' },
+          { id: 'lr-2-3', name: 'Multimedya Odası M-01', capacity: '4 Kişi', description: 'Video düzenleme istasyonları ve yüksek çözünürlüklü monitörler.', floor: 'Kat 3, Doğu Kanadı', image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=200&fit=crop', rating: '4.7', type: 'project' }
+        ],
+        classrooms: [
+          { id: 'cr-2-1', name: 'Amfi D-301', capacity: '120 Kişi', description: 'Amfi düzeni, çift projeksiyon ekranı ve kayıt sistemi.', floor: 'Kat 3, Merkez Bina', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop', rating: '4.9', type: 'lecture' },
+          { id: 'cr-2-2', name: 'Lab Dersliği L-104', capacity: '25 Kişi', description: 'Her masada bilgisayar, yazılım geliştirme ortamı kurulu.', floor: 'Kat 1, Mühendislik Fakültesi', image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop', rating: '4.8', type: 'lab' }
+        ]
+      },
+      {
+        id: 'univ-3', name: 'İstanbul Teknik Üniversitesi', shortName: 'İTÜ', logo: '⚙️',
+        campus: 'Maslak / İstanbul',
+        image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&h=250&fit=crop',
+        libraryRooms: [
+          { id: 'lr-3-1', name: 'Sessiz Alan S-01', capacity: '1 Kişi', description: 'Minimalist tasarımlı bireysel çalışma alanı.', floor: 'Kat 1, Mustafa İnan Kütüphanesi', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop', rating: '4.7', type: 'silent' },
+          { id: 'lr-3-2', name: 'Takım Odası T-201', capacity: '6 Kişi', description: 'Ekran paylaşım sistemi ve beyaz tahta.', floor: 'Kat 2, Kütüphane', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop', rating: '4.8', type: 'group' }
+        ],
+        classrooms: [
+          { id: 'cr-3-1', name: 'Derslik EEB-301', capacity: '60 Kişi', description: 'Elektrik-Elektronik Fakültesi modern dersliği.', floor: 'Kat 3, EEB Binası', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop', rating: '4.8', type: 'lecture' }
+        ]
+      },
+      {
+        id: 'univ-4', name: 'Koç Üniversitesi', shortName: 'KU', logo: '🏛️',
+        campus: 'Sarıyer / İstanbul',
+        image: 'https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=400&h=250&fit=crop',
+        libraryRooms: [
+          { id: 'lr-4-1', name: 'Premium Çalışma Odası P-01', capacity: '2 Kişi', description: 'Ergonomik mobilya, doğal aydınlatma, kahve servisi.', floor: 'Kat 1, Suna Kıraç Kütüphanesi', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop', rating: '5.0', type: 'silent' },
+          { id: 'lr-4-2', name: 'Kolaborasyon Merkezi K-101', capacity: '10-12 Kişi', description: 'Modüler mobilya, çoklu ekran ve sunum alanı.', floor: 'Kat 1, İnovasyon Merkezi', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop', rating: '4.9', type: 'group' }
+        ],
+        classrooms: [
+          { id: 'cr-4-1', name: 'Case Study Odası CS-201', capacity: '40 Kişi', description: 'Harvard tarzı amfi düzeni, vaka analizi odası.', floor: 'Kat 2, İşletme Fakültesi', image: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop', rating: '4.9', type: 'seminar' }
+        ]
+      },
+      {
+        id: 'univ-5', name: 'Bilkent Üniversitesi', shortName: 'BİLKENT', logo: '📚',
+        campus: 'Çankaya / Ankara',
+        image: 'https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=250&fit=crop',
+        libraryRooms: [
+          { id: 'lr-5-1', name: 'Bireysel Kabin BK-01', capacity: '1 Kişi', description: 'Kişisel çalışma kabini, gürültü izolasyonu.', floor: 'Kat 1, Merkez Kütüphane', image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop', rating: '4.8', type: 'silent' },
+          { id: 'lr-5-2', name: 'Grup Çalışma Alanı GA-201', capacity: '8 Kişi', description: 'Büyük çalışma masaları ve sunum imkanı.', floor: 'Kat 2, Kütüphane', image: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop', rating: '4.7', type: 'group' }
+        ],
+        classrooms: [
+          { id: 'cr-5-1', name: 'EE-01 Bilgisayar Labı', capacity: '30 Kişi', description: 'Her masada iMac, yazılım araçları kurulu.', floor: 'Kat 1, Mühendislik Binası', image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop', rating: '4.9', type: 'lab' }
+        ]
+      }
     ],
     academicians: [
       {

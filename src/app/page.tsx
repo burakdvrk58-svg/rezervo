@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import {
   Calendar,
   Star,
@@ -47,6 +48,7 @@ import Hero from '@/components/ui/animated-shader-hero'
 import BorderRotate from '@/components/ui/animated-gradient-border'
 
 export default function LandingPage() {
+  const pathname = usePathname()
   const [activeTab, setActiveTab] = useState<'student' | 'academician'>('student')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [hoveredCase, setHoveredCase] = useState<number | null>(null)
@@ -65,7 +67,7 @@ export default function LandingPage() {
       setIsLoggedIn(loggedIn)
       setUserRole(role)
     }
-  }, [])
+  }, [pathname])
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
