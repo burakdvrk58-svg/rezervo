@@ -40,6 +40,7 @@ public class AuthController {
 
         User user = new User();
         user.setUsername(request.getUsername());
+        user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.ROLE_USER); // Varsayılan rol
@@ -60,7 +61,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Kullanıcı adı veya şifre hatalı!");
         }
 
-        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name(), user.getFullName());
 
         return ResponseEntity.ok(token);
     }

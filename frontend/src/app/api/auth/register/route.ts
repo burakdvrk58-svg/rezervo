@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         username,
+        fullName: name,
         email,
         password
       })

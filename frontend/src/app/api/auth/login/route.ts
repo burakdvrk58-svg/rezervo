@@ -44,9 +44,27 @@ export async function POST(request: Request) {
       if (payload.role === 'ROLE_SUPER_ADMIN') role = 'admin'
       else if (payload.role === 'ROLE_ROOM_LEADER') role = 'business'
 
+      // Map seeded user names or clean up username if no fullName claim is present
+      let displayName = payload.fullName || payload.sub || email
+      if (!payload.fullName) {
+        if (payload.sub === 'customer') {
+          displayName = 'Ahmet Yılmaz'
+        } else if (payload.sub === 'business') {
+          displayName = 'Prof. Dr. Albert Ali Salah'
+        } else if (payload.sub === 'admin') {
+          displayName = 'Can Ertekin'
+        } else {
+          // Capitalize first letter of username digits-removed as a generic fallback
+          const cleanName = (payload.sub || '').replace(/[0-9]/g, '')
+          if (cleanName) {
+            displayName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1)
+          }
+        }
+      }
+
       const userWithoutPassword = {
         id: payload.sub || email,
-        name: payload.sub || email,
+        name: displayName,
         email: email,
         role: role,
         token: token

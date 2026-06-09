@@ -25,26 +25,31 @@ public class ReservationApplication {
                                          PasswordEncoder passwordEncoder) {
         return args -> {
             // Seed Test Users
+            userRepository.deleteAll();
             if (userRepository.count() == 0) {
                 // Student
-                User student = new User();
-                student.setUsername("student");
-                student.setEmail("student@rezervo.com");
-                student.setPassword(passwordEncoder.encode("student123"));
-                student.setRole(Role.ROLE_USER);
-                userRepository.save(student);
+                // Customer (Student)
+                User customer = new User();
+                customer.setUsername("customer");
+                customer.setFullName("Ahmet Yılmaz");
+                customer.setEmail("customer@rezervo.com");
+                customer.setPassword(passwordEncoder.encode("customer123"));
+                customer.setRole(Role.ROLE_USER);
+                userRepository.save(customer);
 
-                // Teacher (Academician / Room Leader)
-                User teacher = new User();
-                teacher.setUsername("teacher");
-                teacher.setEmail("teacher@rezervo.com");
-                teacher.setPassword(passwordEncoder.encode("teacher123"));
-                teacher.setRole(Role.ROLE_ROOM_LEADER);
-                userRepository.save(teacher);
+                // Business (Academician / Room Leader)
+                User business = new User();
+                business.setUsername("business");
+                business.setFullName("Prof. Dr. Albert Ali Salah");
+                business.setEmail("business@rezervo.com");
+                business.setPassword(passwordEncoder.encode("business123"));
+                business.setRole(Role.ROLE_ROOM_LEADER);
+                userRepository.save(business);
 
                 // Admin (Super Admin)
                 User admin = new User();
                 admin.setUsername("admin");
+                admin.setFullName("Can Ertekin");
                 admin.setEmail("admin@rezervo.com");
                 admin.setPassword(passwordEncoder.encode("admin123"));
                 admin.setRole(Role.ROLE_SUPER_ADMIN);

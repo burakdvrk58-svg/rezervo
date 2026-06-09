@@ -1,0 +1,602 @@
+{
+  "users": [
+    {
+      "id": "u-admin",
+      "name": "Can Ertekin",
+      "email": "admin@rezervo.com",
+      "password": "admin123",
+      "role": "admin",
+      "status": "aktif"
+    },
+    {
+      "id": "u-academician",
+      "name": "Prof. Dr. Albert Ali Salah",
+      "email": "business@rezervo.com",
+      "password": "business123",
+      "role": "business",
+      "status": "aktif",
+      "universityId": "univ-1",
+      "department": "Bilgisayar Mühendisliği",
+      "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces"
+    },
+    {
+      "id": "u-student",
+      "name": "Ahmet Yılmaz",
+      "email": "customer@rezervo.com",
+      "password": "customer123",
+      "role": "customer",
+      "status": "aktif",
+      "studentNo": "1420",
+      "universityId": "univ-2"
+    }
+  ],
+  "universities": [
+    {
+      "id": "univ-1",
+      "name": "Boğaziçi Üniversitesi",
+      "shortName": "BOUN",
+      "logo": "🎓",
+      "campus": "Bebek / İstanbul",
+      "image": "https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=250&fit=crop",
+      "libraryRooms": [
+        {
+          "id": "lr-1-1",
+          "name": "Sessiz Çalışma Odası A",
+          "capacity": "1 Kişi",
+          "description": "Ergonomik sandalye, bireysel priz ve LED masa lambası.",
+          "floor": "Kat 1, Doğu Kanadı",
+          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "silent"
+        },
+        {
+          "id": "lr-1-2",
+          "name": "Grup Çalışma Odası 101",
+          "capacity": "6-8 Kişi",
+          "description": "Akıllı tahta, projeksiyon cihazı ve beyaz tahta donanımlı.",
+          "floor": "Kat 1, Batı Kanadı",
+          "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "group"
+        },
+        {
+          "id": "lr-1-3",
+          "name": "Proje & Tasarım Odası",
+          "capacity": "4-6 Kişi",
+          "description": "Yüksek performanslı bilgisayarlar ve geniş çizim masaları.",
+          "floor": "Kat 2, Orta Alan",
+          "image": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=200&fit=crop",
+          "rating": "4.7",
+          "type": "project"
+        }
+      ],
+      "classrooms": [
+        {
+          "id": "cr-1-1",
+          "name": "Derslik D-101",
+          "capacity": "30 Kişi",
+          "description": "Projeksiyon, klima ve ses sistemi donanımlı modern derslik.",
+          "floor": "Kat 1, Ana Bina",
+          "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "lecture"
+        },
+        {
+          "id": "cr-1-2",
+          "name": "Seminer Salonu S-201",
+          "capacity": "15 Kişi",
+          "description": "U-düzen masa yerleşimi, akıllı tahta ve video konferans.",
+          "floor": "Kat 2, Kuzey Kanadı",
+          "image": "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "seminar"
+        }
+      ]
+    },
+    {
+      "id": "univ-2",
+      "name": "Orta Doğu Teknik Üniversitesi",
+      "shortName": "ODTÜ",
+      "logo": "🔬",
+      "campus": "Çankaya / Ankara",
+      "image": "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=400&h=250&fit=crop",
+      "libraryRooms": [
+        {
+          "id": "lr-2-1",
+          "name": "Bireysel Kabin B-01",
+          "capacity": "1 Kişi",
+          "description": "Ses yalıtımlı bireysel çalışma kabini, USB şarj portu.",
+          "floor": "Kat 1, Merkez Kütüphane",
+          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "silent"
+        },
+        {
+          "id": "lr-2-2",
+          "name": "Grup Odası G-102",
+          "capacity": "8-10 Kişi",
+          "description": "Geniş toplantı masası, çift projeksiyon ve beyaz tahta.",
+          "floor": "Kat 2, Batı Kanadı",
+          "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "group"
+        },
+        {
+          "id": "lr-2-3",
+          "name": "Multimedya Odası M-01",
+          "capacity": "4 Kişi",
+          "description": "Video düzenleme istasyonları ve yüksek çözünürlüklü monitörler.",
+          "floor": "Kat 3, Doğu Kanadı",
+          "image": "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&h=200&fit=crop",
+          "rating": "4.7",
+          "type": "project"
+        }
+      ],
+      "classrooms": [
+        {
+          "id": "cr-2-1",
+          "name": "Amfi D-301",
+          "capacity": "120 Kişi",
+          "description": "Amfi düzeni, çift projeksiyon ekranı ve kayıt sistemi.",
+          "floor": "Kat 3, Merkez Bina",
+          "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "lecture"
+        },
+        {
+          "id": "cr-2-2",
+          "name": "Lab Dersliği L-104",
+          "capacity": "25 Kişi",
+          "description": "Her masada bilgisayar, yazılım geliştirme ortamı kurulu.",
+          "floor": "Kat 1, Mühendislik Fakültesi",
+          "image": "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "lab"
+        }
+      ]
+    },
+    {
+      "id": "univ-3",
+      "name": "İstanbul Teknik Üniversitesi",
+      "shortName": "İTÜ",
+      "logo": "⚙️",
+      "campus": "Maslak / İstanbul",
+      "image": "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=400&h=250&fit=crop",
+      "libraryRooms": [
+        {
+          "id": "lr-3-1",
+          "name": "Sessiz Alan S-01",
+          "capacity": "1 Kişi",
+          "description": "Minimalist tasarımlı bireysel çalışma alanı.",
+          "floor": "Kat 1, Mustafa İnan Kütüphanesi",
+          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop",
+          "rating": "4.7",
+          "type": "silent"
+        },
+        {
+          "id": "lr-3-2",
+          "name": "Takım Odası T-201",
+          "capacity": "6 Kişi",
+          "description": "Ekran paylaşım sistemi ve beyaz tahta.",
+          "floor": "Kat 2, Kütüphane",
+          "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "group"
+        }
+      ],
+      "classrooms": [
+        {
+          "id": "cr-3-1",
+          "name": "Derslik EEB-301",
+          "capacity": "60 Kişi",
+          "description": "Elektrik-Elektronik Fakültesi modern dersliği.",
+          "floor": "Kat 3, EEB Binası",
+          "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "lecture"
+        }
+      ]
+    },
+    {
+      "id": "univ-4",
+      "name": "Koç Üniversitesi",
+      "shortName": "KU",
+      "logo": "🏛️",
+      "campus": "Sarıyer / İstanbul",
+      "image": "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?w=400&h=250&fit=crop",
+      "libraryRooms": [
+        {
+          "id": "lr-4-1",
+          "name": "Premium Çalışma Odası P-01",
+          "capacity": "2 Kişi",
+          "description": "Ergonomik mobilya, doğal aydınlatma, kahve servisi.",
+          "floor": "Kat 1, Suna Kıraç Kütüphanesi",
+          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop",
+          "rating": "5.0",
+          "type": "silent"
+        },
+        {
+          "id": "lr-4-2",
+          "name": "Kolaborasyon Merkezi K-101",
+          "capacity": "10-12 Kişi",
+          "description": "Modüler mobilya, çoklu ekran ve sunum alanı.",
+          "floor": "Kat 1, İnovasyon Merkezi",
+          "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "group"
+        }
+      ],
+      "classrooms": [
+        {
+          "id": "cr-4-1",
+          "name": "Case Study Odası CS-201",
+          "capacity": "40 Kişi",
+          "description": "Harvard tarzı amfi düzeni, vaka analizi odası.",
+          "floor": "Kat 2, İşletme Fakültesi",
+          "image": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "seminar"
+        }
+      ]
+    },
+    {
+      "id": "univ-5",
+      "name": "Bilkent Üniversitesi",
+      "shortName": "BİLKENT",
+      "logo": "📚",
+      "campus": "Çankaya / Ankara",
+      "image": "https://images.unsplash.com/photo-1562774053-701939374585?w=400&h=250&fit=crop",
+      "libraryRooms": [
+        {
+          "id": "lr-5-1",
+          "name": "Bireysel Kabin BK-01",
+          "capacity": "1 Kişi",
+          "description": "Kişisel çalışma kabini, gürültü izolasyonu.",
+          "floor": "Kat 1, Merkez Kütüphane",
+          "image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop",
+          "rating": "4.8",
+          "type": "silent"
+        },
+        {
+          "id": "lr-5-2",
+          "name": "Grup Çalışma Alanı GA-201",
+          "capacity": "8 Kişi",
+          "description": "Büyük çalışma masaları ve sunum imkanı.",
+          "floor": "Kat 2, Kütüphane",
+          "image": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop",
+          "rating": "4.7",
+          "type": "group"
+        }
+      ],
+      "classrooms": [
+        {
+          "id": "cr-5-1",
+          "name": "EE-01 Bilgisayar Labı",
+          "capacity": "30 Kişi",
+          "description": "Her masada iMac, yazılım araçları kurulu.",
+          "floor": "Kat 1, Mühendislik Binası",
+          "image": "https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop",
+          "rating": "4.9",
+          "type": "lab"
+        }
+      ]
+    }
+  ],
+  "academicians": [
+    {
+      "id": "acad-1",
+      "name": "Prof. Dr. Albert Ali Salah",
+      "title": "Prof. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "business@rezervo.com",
+      "universityId": "univ-1",
+      "rating": 4.9,
+      "reviews": 124,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Yapay Zeka & Bilgisayarlı Görme",
+      "amenities": [
+        "Birebir Görüşme",
+        "Tez Danışmanlığı",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "09:00 - 09:15",
+        "09:15 - 09:30",
+        "09:30 - 09:45",
+        "10:00 - 10:15",
+        "10:15 - 10:30",
+        "10:30 - 10:45",
+        "11:00 - 11:15",
+        "11:15 - 11:30"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-2",
+      "name": "Doç. Dr. Ayşe Bener",
+      "title": "Doç. Dr.",
+      "department": "Yazılım Mühendisliği",
+      "email": "ayse.bener@boun.edu.tr",
+      "universityId": "univ-1",
+      "rating": 4.8,
+      "reviews": 95,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Yazılım Kalitesi & Empirik Analiz",
+      "amenities": [
+        "Proje Danışmanlığı",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "14:00 - 14:15",
+        "14:15 - 14:30",
+        "14:30 - 14:45",
+        "15:00 - 15:15"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-3",
+      "name": "Prof. Dr. Kemal Oflazer",
+      "title": "Prof. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "kemal.oflazer@metu.edu.tr",
+      "universityId": "univ-2",
+      "rating": 4.9,
+      "reviews": 140,
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Doğal Dil İşleme",
+      "amenities": [
+        "Tez Danışmanlığı",
+        "Yapay Zeka",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "10:00 - 10:15",
+        "10:15 - 10:30",
+        "10:30 - 10:45",
+        "11:00 - 11:15",
+        "11:15 - 11:30"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-4",
+      "name": "Dr. Öğr. Üyesi Halhal Öztürk",
+      "title": "Dr. Öğr. Üyesi",
+      "department": "Matematik",
+      "email": "halhal.ozturk@metu.edu.tr",
+      "universityId": "univ-2",
+      "rating": 4.7,
+      "reviews": 64,
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Soyut Cebir & Analiz",
+      "amenities": [
+        "Soru Çözümü & Destek",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "09:00 - 09:15",
+        "09:15 - 09:30",
+        "09:30 - 09:45"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-5",
+      "name": "Prof. Dr. Eşref Adalı",
+      "title": "Prof. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "eadali@itu.edu.tr",
+      "universityId": "univ-3",
+      "rating": 4.9,
+      "reviews": 180,
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Bilgisayar Mimarisi & Türkçe İşleme",
+      "amenities": [
+        "15 Dk Görüşme",
+        "Birebir Görüşme"
+      ],
+      "slots": [
+        "13:00 - 13:15",
+        "13:15 - 13:30",
+        "13:30 - 13:45",
+        "14:00 - 14:15"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-6",
+      "name": "Doç. Dr. Gözde Şensoy",
+      "title": "Doç. Dr.",
+      "department": "Endüstri Mühendisliği",
+      "email": "gozde.sensoy@itu.edu.tr",
+      "universityId": "univ-3",
+      "rating": 4.8,
+      "reviews": 75,
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Yöneylem Araştırması & Karar Verme",
+      "amenities": [
+        "Staj Danışmanlığı",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "10:00 - 10:15",
+        "10:15 - 10:30",
+        "10:30 - 10:45"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-7",
+      "name": "Prof. Dr. Attila Gürsoy",
+      "title": "Prof. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "agursoy@ku.edu.tr",
+      "universityId": "univ-4",
+      "rating": 4.9,
+      "reviews": 110,
+      "avatar": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Biyoenformatik & Paralel Sistemler",
+      "amenities": [
+        "Tez Danışmanlığı",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "15:00 - 15:15",
+        "15:15 - 15:30",
+        "15:30 - 15:45"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-8",
+      "name": "Doç. Dr. Deniz Yuret",
+      "title": "Doç. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "dyuret@ku.edu.tr",
+      "universityId": "univ-4",
+      "rating": 5,
+      "reviews": 154,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Knet & Derin Öğrenme Frameworkleri",
+      "amenities": [
+        "Derin Öğrenme",
+        "Yapay Zeka",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "09:30 - 09:45",
+        "09:45 - 10:00",
+        "10:00 - 10:15",
+        "10:15 - 10:30"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-9",
+      "name": "Prof. Dr. Özcan Öztürk",
+      "title": "Prof. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "ozturk@bilkent.edu.tr",
+      "universityId": "univ-5",
+      "rating": 4.9,
+      "reviews": 115,
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Gömülü Sistemler & Derleyiciler",
+      "amenities": [
+        "Tez Danışmanlığı",
+        "15 Dk Görüşme"
+      ],
+      "slots": [
+        "10:30 - 10:45",
+        "10:45 - 11:00",
+        "11:00 - 11:15"
+      ],
+      "aiAssistantActive": false
+    },
+    {
+      "id": "acad-10",
+      "name": "Doç. Dr. Eray Tüzün",
+      "title": "Doç. Dr.",
+      "department": "Bilgisayar Mühendisliği",
+      "email": "tuzun@bilkent.edu.tr",
+      "universityId": "univ-5",
+      "rating": 4.8,
+      "reviews": 90,
+      "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces",
+      "tag": "Ampirik Yazılım Mühendisliği & Oyun Tasarımı",
+      "amenities": [
+        "Oyun Geliştirme",
+        "15 Dk Görüşme",
+        "Staj Danışmanlığı"
+      ],
+      "slots": [
+        "14:00 - 14:15",
+        "14:15 - 14:30",
+        "14:30 - 14:45",
+        "14:45 - 15:00"
+      ],
+      "aiAssistantActive": false
+    }
+  ],
+  "bookings": [
+    {
+      "id": "res-1",
+      "userId": "u-student",
+      "studentName": "Ahmet Yılmaz",
+      "studentNo": "1420",
+      "studentEmail": "customer@rezervo.com",
+      "category": "teacher",
+      "academicianId": "acad-1",
+      "academicianName": "Prof. Dr. Albert Ali Salah",
+      "universityId": "univ-1",
+      "universityName": "Boğaziçi Üniversitesi",
+      "title": "Prof. Dr. Albert Ali Salah ile Görüşme",
+      "subtitle": "Boğaziçi Üniversitesi",
+      "date": "08 Haziran Pazartesi",
+      "time": "09:00 - 09:15",
+      "details": "Bitirme Projesi Detayları ve Yapay Zeka Modelleri",
+      "status": "Onaylandı",
+      "statusColor": "text-emerald-700 bg-emerald-50 border-emerald-100",
+      "image": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces",
+      "price": "Ücretsiz"
+    },
+    {
+      "id": "res-2",
+      "userId": "u-student",
+      "studentName": "Ahmet Yılmaz",
+      "studentNo": "1420",
+      "studentEmail": "customer@rezervo.com",
+      "category": "teacher",
+      "academicianId": "acad-3",
+      "academicianName": "Prof. Dr. Kemal Oflazer",
+      "universityId": "univ-2",
+      "universityName": "Orta Doğu Teknik Üniversitesi",
+      "title": "Prof. Dr. Kemal Oflazer ile Görüşme",
+      "subtitle": "Orta Doğu Teknik Üniversitesi",
+      "date": "10 Haziran Çarşamba",
+      "time": "10:15 - 10:30",
+      "details": "Doğal Dil İşleme Tez Konusu Belirleme",
+      "status": "Beklemede",
+      "statusColor": "text-amber-700 bg-amber-50 border-amber-100",
+      "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces",
+      "price": "Ücretsiz"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-1",
+      "senderId": "u-student",
+      "receiverId": "u-academician",
+      "content": "Merhabalar Albert hocam, proje raporunu size e-posta üzerinden ilettim. Randevu saatimizde inceleyebilir miyiz?",
+      "timestamp": "08 Haziran Pazartesi, 14:20"
+    },
+    {
+      "id": "msg-2",
+      "senderId": "u-academician",
+      "receiverId": "u-student",
+      "content": "Selam Ahmet. Raporu aldım ve göz gezdirdim. Görüşmede detayları tartışırız, hazır gel.",
+      "timestamp": "08 Haziran Pazartesi, 15:45"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-1",
+      "userId": "u-academician",
+      "role": "business",
+      "title": "Yeni İstek",
+      "desc": "Ahmet Yılmaz bitirme projesi için randevu talebi gönderdi.",
+      "time": "3s önce",
+      "unread": true
+    },
+    {
+      "id": "notif-2",
+      "userId": "u-student",
+      "role": "customer",
+      "title": "Randevu Onaylandı",
+      "desc": "Prof. Dr. Albert Ali Salah randevunuzu onayladı.",
+      "time": "1s önce",
+      "unread": true
+    }
+  ]
+}

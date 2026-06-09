@@ -20,9 +20,19 @@ public class JwtUtil {
 
     // Token üret
     public String generateToken(String username, String role) {
-        return Jwts.builder()
+        return generateToken(username, role, null);
+    }
+
+    public String generateToken(String username, String role, String fullName) {
+        JwtBuilder builder = Jwts.builder()
                 .setSubject(username)
-                .claim("role", role)
+                .claim("role", role);
+        
+        if (fullName != null) {
+            builder.claim("fullName", fullName);
+        }
+
+        return builder
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24 saat
                 .signWith(getKey(), SignatureAlgorithm.HS256)
