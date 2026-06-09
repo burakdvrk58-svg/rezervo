@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { readDb } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
@@ -12,38 +11,57 @@ export async function POST(request: Request) {
       )
     }
 
-    const db = readDb()
-    const users = db.users || []
+    // Connect to Java Spring Boot Auth API
+    const res = await fetch('http://localhost:8081/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: email,
+        password: password
+      })
+    })
 
-    // Find matching user (case insensitive email, exact password match)
-    const user = users.find(
-      (u: any) =>
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    )
-
-    if (!user) {
+    if (!res.ok) {
+      const errorText = await res.text()
       return NextResponse.json(
-        { error: 'E-posta adresi veya şifre hatalı.' },
-        { status: 401 }
+        { error: errorText || 'E-posta adresi veya şifre hatalı.' },
+        { status: res.status }
       )
     }
 
-    if (user.status === 'pasif') {
-      // Auto-heal: reactivate user status in db and proceed with login
-      user.status = 'aktif'
-      db.users = db.users.map((u: any) => u.id === user.id ? { ...u, status: 'aktif' } : u)
-      const { writeDb } = require('@/lib/db')
-      writeDb(db)
+    const token = await res.text()
+
+    // Decode JWT payload (format: header.payload.signature)
+    try {
+      const payloadBase64 = token.split('.')[1]
+      const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf-8')
+      const payload = JSON.parse(payloadJson)
+
+      // Role mapping: ROLE_SUPER_ADMIN -> admin, ROLE_ROOM_LEADER -> business, ROLE_USER -> customer
+      let role = 'customer'
+      if (payload.role === 'ROLE_SUPER_ADMIN') role = 'admin'
+      else if (payload.role === 'ROLE_ROOM_LEADER') role = 'business'
+
+      const userWithoutPassword = {
+        id: payload.sub || email,
+        name: payload.sub || email,
+        email: email,
+        role: role,
+        token: token
+      }
+
+      return NextResponse.json(
+        { success: true, user: userWithoutPassword },
+        { status: 200 }
+      )
+    } catch (e) {
+      return NextResponse.json(
+        { error: 'JWT token çözümlenemedi.' },
+        { status: 500 }
+      )
     }
-
-
-    // Return user details without password
-    const { password: _, ...userWithoutPassword } = user
-
-    return NextResponse.json(
-      { success: true, user: userWithoutPassword },
-      { status: 200 }
-    )
   } catch (error) {
     return NextResponse.json(
       { error: 'Giriş sırasında bir sunucu hatası oluştu.' },

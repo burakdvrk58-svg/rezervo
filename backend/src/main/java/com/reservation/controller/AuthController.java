@@ -54,7 +54,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElse(null);
+                .orElseGet(() -> userRepository.findByEmail(request.getUsername()).orElse(null));
 
         if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return ResponseEntity.badRequest().body("Kullanıcı adı veya şifre hatalı!");

@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import { readDb, writeDb } from '@/lib/db'
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, universityId, universityName } = await request.json()
+    const { name, email, password } = await request.json()
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -12,34 +11,30 @@ export async function POST(request: Request) {
       )
     }
 
-    const db = readDb()
-    const users = db.users || []
+    // Generate a unique username from the name
+    const usernameClean = name.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const username = usernameClean + Math.floor(100 + Math.random() * 900)
 
-    // Check if user already exists
-    const userExists = users.some(
-      (u: any) => u.email.toLowerCase() === email.toLowerCase()
-    )
-    if (userExists) {
+    // Send request to Java Spring Boot Register API
+    const res = await fetch('http://localhost:8081/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        email,
+        password
+      })
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
       return NextResponse.json(
-        { error: 'Bu e-posta adresi zaten kullanımda.' },
-        { status: 400 }
+        { error: errorText || 'Kayıt sırasında bir hata oluştu.' },
+        { status: res.status }
       )
     }
-
-    // Create new user object
-    const newUser = {
-      id: `u-${Date.now()}`,
-      name,
-      email: email.toLowerCase(),
-      password, // In a production app, use bcrypt to hash passwords
-      role: 'customer',
-      status: 'aktif',
-      universityId: universityId || 'univ-1',
-      universityName: universityName || 'Boğaziçi Üniversitesi'
-    }
-
-    db.users = [...users, newUser]
-    writeDb(db)
 
     return NextResponse.json(
       { success: true, message: 'Kayıt başarıyla oluşturuldu.' },
