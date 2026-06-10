@@ -49,6 +49,13 @@ export default function AdminRoomsPage() {
   const [startHour, setStartHour] = useState('09:00')
   const [endHour, setEndHour] = useState('17:00')
 
+  // University Form states
+  const [univName, setUnivName] = useState('')
+  const [univShortName, setUnivShortName] = useState('')
+  const [univCampus, setUnivCampus] = useState('')
+  const [univLogo, setUnivLogo] = useState('🎓')
+  const [isAddingUniv, setIsAddingUniv] = useState(false)
+
   useEffect(() => {
     document.title = 'Okul & Oda Yönetimi | Yönetici Paneli'
     fetchUniversities()
@@ -162,6 +169,43 @@ export default function AdminRoomsPage() {
       }
     } catch (err: any) {
       toast.error('Oda silinirken hata oluştu: ' + err.message)
+    }
+  }
+
+  const handleAddUniversity = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!univName.trim() || !univShortName.trim() || !univCampus.trim()) return
+
+    setIsAddingUniv(true)
+    try {
+      const res = await fetch('/api/school', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: univName,
+          shortName: univShortName.trim().toUpperCase(),
+          campus: univCampus,
+          logo: univLogo
+        })
+      })
+
+      if (res.ok) {
+        const newUniv = await res.json()
+        toast.success(`"${newUniv.name}" üniversitesi başarıyla sisteme eklendi!`)
+        setUnivName('')
+        setUnivShortName('')
+        setUnivCampus('')
+        setUnivLogo('🎓')
+        await fetchUniversities()
+        setSelectedUnivId(newUniv.id)
+      } else {
+        const errData = await res.json()
+        toast.error(errData.error || 'Üniversite eklenemedi.')
+      }
+    } catch (err: any) {
+      toast.error('Üniversite ekleme sırasında hata oluştu: ' + err.message)
+    } finally {
+      setIsAddingUniv(false)
     }
   }
 
@@ -493,6 +537,86 @@ export default function AdminRoomsPage() {
               <strong><code>{` [${activeUniv?.shortName || 'OKUL'}] `}</code></strong> etiketi eklenir. 
               Böylece oda sadece o üniversitenin kütüphane veya derslik arama ekranında görünür.
             </p>
+          </div>
+
+          {/* Yeni Üniversite Ekle Kartı */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+            <h2 className="text-sm font-extrabold text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
+              <Plus className="h-5 w-5 text-primary" />
+              Yeni Üniversite Ekle
+            </h2>
+            <p className="text-xs text-slate-500 leading-normal">
+              Sisteme yeni bir eğitim kurumu tanımlayarak öğrencilerin bu okul için kütüphane ve derslik rezervasyonları oluşturmasını sağlayın.
+            </p>
+
+            <form onSubmit={handleAddUniversity} className="space-y-4 pt-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Logo / İkon</label>
+                <select
+                  value={univLogo}
+                  onChange={(e) => setUnivLogo(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:border-primary focus:outline-none"
+                >
+                  <option value="🎓">🎓 Kep (Varsayılan)</option>
+                  <option value="🏛️">🏛️ Klasik Bina</option>
+                  <option value="📚">📚 Kitaplar</option>
+                  <option value="🔬">🔬 Mikroskop</option>
+                  <option value="⚙️">⚙️ Dişli / Teknik</option>
+                  <option value="🏫">🏫 Okul Binası</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Üniversite Adı</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Örn: Galatasaray Üniversitesi"
+                  value={univName}
+                  onChange={(e) => setUnivName(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kısa Kod (Büyük Harf)</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Örn: GSÜ"
+                  value={univShortName}
+                  onChange={(e) => setUnivShortName(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kampüs / Lokasyon</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Örn: Ortaköy / İstanbul"
+                  value={univCampus}
+                  onChange={(e) => setUnivCampus(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-primary focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAddingUniv}
+                className="w-full rounded-xl bg-purple-600 py-3 text-xs font-extrabold text-white hover:bg-purple-700 transition-all shadow-md shadow-purple-600/10 flex items-center justify-center gap-1.5"
+              >
+                {isAddingUniv ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <>
+                    <Building2 className="h-4 w-4" />
+                    Sisteme Tanımla (db.json)
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
 
