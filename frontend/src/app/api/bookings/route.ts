@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 // Helper to parse Turkish textual dates (e.g. "08 Haziran Pazartesi" or "09 Haziran 2026") to YYYY-MM-DD
 function parseTurkishDate(dateStr: string): string {
@@ -54,7 +56,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    const res = await fetch('http://localhost:8081/api/reservations', {
+    const res = await fetch(`${BACKEND_URL}/api/reservations`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -148,7 +150,7 @@ export async function POST(request: Request) {
       description: body.details || body.notes || 'Akademik Danışmanlık Görüşmesi'
     }
 
-    const res = await fetch('http://localhost:8081/api/reservations', {
+    const res = await fetch(`${BACKEND_URL}/api/reservations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +197,7 @@ export async function DELETE(request: Request) {
     // Extract numeric ID
     const id = rawId.replace('res-', '').replace('sch-res-', '')
 
-    const res = await fetch(`http://localhost:8081/api/reservations/${id}/reject`, {
+    const res = await fetch(`${BACKEND_URL}/api/reservations/${id}/reject`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`

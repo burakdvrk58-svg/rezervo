@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET() {
   try {
@@ -10,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    const res = await fetch('http://localhost:8081/api/reservations', {
+    const res = await fetch(`${BACKEND_URL}/api/reservations`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -91,7 +93,7 @@ export async function PATCH(request: Request) {
     const id = rawId.replace('res-', '').replace('sch-res-', '')
     const springAction = action === 'approve' ? 'approve' : 'reject'
 
-    const res = await fetch(`http://localhost:8081/api/reservations/${id}/${springAction}`, {
+    const res = await fetch(`${BACKEND_URL}/api/reservations/${id}/${springAction}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`

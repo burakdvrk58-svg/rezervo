@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { readDb } from '@/lib/db'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET(request: Request) {
   try {
@@ -15,7 +17,7 @@ export async function GET(request: Request) {
     let sqlRooms: any[] = []
     if (token) {
       try {
-        const roomsRes = await fetch('http://localhost:8081/api/rooms', {
+        const roomsRes = await fetch(`${BACKEND_URL}/api/rooms`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -133,7 +135,7 @@ export async function POST(request: Request) {
     // Prefix name with [universityShortName] to scope it
     const prefixedName = `[${universityShortName}] ${name}`
 
-    const res = await fetch('http://localhost:8081/api/rooms', {
+    const res = await fetch(`${BACKEND_URL}/api/rooms`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -174,7 +176,7 @@ export async function DELETE(request: Request) {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const res = await fetch(`http://localhost:8081/api/rooms/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/api/rooms/${id}`, {
       method: 'DELETE',
       headers
     })

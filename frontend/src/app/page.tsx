@@ -108,7 +108,7 @@ export default function LandingPage() {
   }
 
   const handleSecondaryClick = () => {
-    const el = document.getElementById('demo')
+    const el = document.getElementById('sanal-panel')
     if (el) el.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -288,7 +288,7 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
             <a href="#features" className="text-slate-400 hover:text-white transition-colors">Özellikler</a>
             <a href="#why" className="text-slate-400 hover:text-white transition-colors">Neden Biz?</a>
-            <a href="#demo" className="text-slate-400 hover:text-white transition-colors">Sanal Panel</a>
+            <a href="#sanal-panel" className="text-slate-400 hover:text-white transition-colors">Sanal Panel</a>
             <a href="#integrations" className="text-slate-400 hover:text-white transition-colors">Entegrasyonlar</a>
             <a href="#testimonials" className="text-slate-400 hover:text-white transition-colors">Yorumlar</a>
           </nav>
@@ -362,7 +362,7 @@ export default function LandingPage() {
             >
               <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Özellikler</a>
               <a href="#why" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Neden Biz?</a>
-              <a href="#demo" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Sanal Panel</a>
+              <a href="#sanal-panel" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Sanal Panel</a>
               <a href="#integrations" onClick={() => setMobileMenuOpen(false)} className="text-slate-400 hover:text-white py-2">Entegrasyonlar</a>
               {!mounted ? null : isLoggedIn ? (
                 <>
@@ -409,7 +409,7 @@ export default function LandingPage() {
 
 
       {/* ── INTERACTIVE 3D PLATFORM PREVIEW (Hugo style Tabs) ── */}
-      <section id="demo" className="py-24 border-t border-white/5 relative z-10 bg-slate-950/20">
+      <section id="sanal-panel" className="py-24 border-t border-white/5 relative z-10 bg-slate-950/20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
             <h2 className="text-3xl md:text-4xl font-bold text-white">
@@ -933,7 +933,7 @@ export default function LandingPage() {
           <div className="flex gap-4 text-xs">
             <Link href="/" className="text-slate-400 hover:text-white transition-colors">Ana Sayfa</Link>
             <a href="#features" className="text-slate-400 hover:text-white transition-colors">Özellikler</a>
-            <a href="#demo" className="text-slate-400 hover:text-white transition-colors">Sanal Panel</a>
+            <a href="#sanal-panel" className="text-slate-400 hover:text-white transition-colors">Sanal Panel</a>
           </div>
         </div>
       </footer>

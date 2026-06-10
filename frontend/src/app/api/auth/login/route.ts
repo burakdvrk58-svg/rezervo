@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     // Connect to Java Spring Boot Auth API
-    const res = await fetch('http://localhost:8081/api/auth/login', {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

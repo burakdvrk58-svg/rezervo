@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
     const username = usernameClean + Math.floor(100 + Math.random() * 900)
 
     // Send request to Java Spring Boot Register API
-    const res = await fetch('http://localhost:8081/api/auth/register', {
+    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

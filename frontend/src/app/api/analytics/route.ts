@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET() {
   try {
@@ -11,7 +13,7 @@ export async function GET() {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const res = await fetch('http://localhost:8081/api/reservations/analytics', { headers })
+    const res = await fetch(`${BACKEND_URL}/api/reservations/analytics`, { headers })
 
     if (!res.ok) {
       return NextResponse.json({ error: 'Spring Boot analitik verilerini yükleyemedi.' }, { status: res.status })

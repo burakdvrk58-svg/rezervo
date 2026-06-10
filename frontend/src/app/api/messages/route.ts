@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { readDb } from '@/lib/db'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET(request: Request) {
   try {
@@ -15,7 +17,7 @@ export async function GET(request: Request) {
     const cookieStore = await cookies()
     const token = cookieStore.get('rezervo_access_token')?.value
 
-    let url = `http://localhost:8081/api/messages?userId=${userId}`
+    let url = `${BACKEND_URL}/api/messages?userId=${userId}`
     if (chatWith) {
       url += `&chatWith=${chatWith}`
     }
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     // 1. Post student's/sender's message to Spring Boot
-    const res = await fetch('http://localhost:8081/api/messages', {
+    const res = await fetch(`${BACKEND_URL}/api/messages`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -122,7 +124,7 @@ export async function POST(request: Request) {
       }
 
       // Post AI response message back to Spring Boot (so it's saved in the database)
-      await fetch('http://localhost:8081/api/messages', {
+      await fetch(`${BACKEND_URL}/api/messages`, {
         method: 'POST',
         headers,
         body: JSON.stringify({

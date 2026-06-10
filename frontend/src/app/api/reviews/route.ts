@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +20,7 @@ export async function GET(request: Request) {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const res = await fetch(`http://localhost:8081/api/reviews?academicianId=${academicianId}`, { headers })
+    const res = await fetch(`${BACKEND_URL}/api/reviews?academicianId=${academicianId}`, { headers })
 
     if (!res.ok) {
       return NextResponse.json({ error: 'Spring Boot değerlendirmeleri yükleyemedi.' }, { status: res.status })
@@ -44,7 +46,7 @@ export async function POST(request: Request) {
       headers['Authorization'] = `Bearer ${token}`
     }
 
-    const res = await fetch('http://localhost:8081/api/reviews', {
+    const res = await fetch(`${BACKEND_URL}/api/reviews`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body)

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function DELETE(
   _request: Request,
@@ -17,7 +19,7 @@ export async function DELETE(
     // Extract numeric ID
     const id = rawId.replace('res-', '').replace('sch-res-', '')
 
-    const res = await fetch(`http://localhost:8081/api/reservations/${id}/reject`, {
+    const res = await fetch(`${BACKEND_URL}/api/reservations/${id}/reject`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`

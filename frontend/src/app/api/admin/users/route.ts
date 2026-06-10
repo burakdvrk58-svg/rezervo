@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET() {
   try {
@@ -10,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    const res = await fetch('http://localhost:8081/api/users', {
+    const res = await fetch(`${BACKEND_URL}/api/users`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -63,7 +65,7 @@ export async function PATCH(request: Request) {
     if (role === 'admin') newRole = 'ROLE_SUPER_ADMIN'
     else if (role === 'business') newRole = 'ROLE_ROOM_LEADER'
 
-    const res = await fetch(`http://localhost:8081/api/users/${id}/assign-role?newRole=${newRole}`, {
+    const res = await fetch(`${BACKEND_URL}/api/users/${id}/assign-role?newRole=${newRole}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -96,7 +98,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Oturum açılmadı.' }, { status: 401 })
     }
 
-    const res = await fetch(`http://localhost:8081/api/users/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/api/users/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`

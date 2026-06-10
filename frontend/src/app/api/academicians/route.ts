@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { readDb, writeDb } from '@/lib/db'
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8081'
+
 
 export async function GET() {
   try {
@@ -19,7 +21,7 @@ export async function GET() {
     // Fetch reviews from Spring Boot MySQL
     let reviewsList: any[] = []
     try {
-      const reviewsRes = await fetch('http://localhost:8081/api/reviews', { headers })
+      const reviewsRes = await fetch(`${BACKEND_URL}/api/reviews`, { headers })
       if (reviewsRes.ok) {
         reviewsList = await reviewsRes.json()
       }
@@ -130,7 +132,7 @@ export async function POST(request: Request) {
     }
 
     // Save review in Spring Boot MySQL
-    const res = await fetch('http://localhost:8081/api/reviews', {
+    const res = await fetch(`${BACKEND_URL}/api/reviews`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
