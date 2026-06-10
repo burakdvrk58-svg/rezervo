@@ -309,7 +309,7 @@
         "11:00 - 11:15",
         "11:15 - 11:30"
       ],
-      "aiAssistantActive": false
+      "aiAssistantActive": true
     },
     {
       "id": "acad-2",

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { motion } from 'framer-motion'
 import {
   Mic,
   MicOff,
@@ -28,11 +27,6 @@ export default function MeetingRoomPage() {
   const [videoActive, setVideoActive] = useState(true)
   const [screenSharing, setScreenSharing] = useState(false)
   const [activeTab, setActiveTab] = useState<'notes' | 'files' | 'chat'>('notes')
-  
-  // Local stream state
-  const localVideoRef = useRef<HTMLVideoElement>(null)
-  const [streamError, setStreamError] = useState(false)
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
 
   // Shared Notes & Files states (Mock)
   const [notes, setNotes] = useState(
@@ -57,68 +51,79 @@ export default function MeetingRoomPage() {
     }
   }, [])
 
-  // Request camera access on mount
+  const jitsiApiRef = useRef<any>(null)
+
+  // Initialize Jitsi Meet
   useEffect(() => {
-    async function startCamera() {
-      try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 640, height: 480 },
-            audio: true
-          })
-          setMediaStream(stream)
-          if (localVideoRef.current) {
-            localVideoRef.current.srcObject = stream
-          }
-        } else {
-          setStreamError(true)
+    if (!meetingId || !userName) return
+
+    const script = document.createElement('script')
+    script.src = 'https://meet.jit.si/external_api.js'
+    script.async = true
+    script.onload = () => {
+      const domain = 'meet.jit.si'
+      const options = {
+        roomName: `rezervo-meeting-${meetingId}`,
+        width: '100%',
+        height: '100%',
+        parentNode: document.querySelector('#jitsi-container'),
+        userInfo: {
+          displayName: userName
+        },
+        configOverwrite: {
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          disableDeepLinking: true,
+          prejoinPageEnabled: false
+        },
+        interfaceConfigOverwrite: {
+          TILE_VIEW_MAX_COLUMNS: 2,
+          MOBILE_APP_PROMO: false
         }
-      } catch (err) {
-        console.error('Camera access error:', err)
-        setStreamError(true)
       }
+      const api = new (window as any).JitsiMeetExternalAPI(domain, options)
+      jitsiApiRef.current = api
+
+      api.addEventListener('videoConferenceLeft', () => {
+        handleLeaveCall()
+      })
     }
 
-    if (videoActive) {
-      startCamera()
-    } else {
-      stopCamera()
-    }
+    document.body.appendChild(script)
 
     return () => {
-      stopCamera()
+      if (jitsiApiRef.current) {
+        jitsiApiRef.current.dispose()
+      }
+      document.body.removeChild(script)
     }
-  }, [videoActive])
-
-  function stopCamera() {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach((track) => track.stop())
-      setMediaStream(null)
-    }
-  }
+  }, [meetingId, userName])
 
   const toggleMic = () => {
-    if (mediaStream) {
-      mediaStream.getAudioTracks().forEach((track) => {
-        track.enabled = !micActive
-      })
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('toggleAudio')
     }
     setMicActive(!micActive)
   }
 
   const toggleVideo = () => {
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('toggleVideo')
+    }
     setVideoActive(!videoActive)
   }
 
   const toggleScreenShare = () => {
-    if (!screenSharing) {
-      alert('Ekran paylaşımı simülasyonu başlatıldı!')
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('toggleShareScreen')
     }
     setScreenSharing(!screenSharing)
   }
 
   const handleLeaveCall = () => {
-    stopCamera()
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('hangup')
+    }
     if (userRole === 'business') {
       router.push('/business/requests')
     } else {
@@ -126,17 +131,37 @@ export default function MeetingRoomPage() {
     }
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    const newFile = {
-      name: file.name,
-      size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-      sender: userRole === 'business' ? 'Danışman' : 'Öğrenci',
-      time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      setChatMessages((p) => [...p, { sender: 'Sistem', text: `Dosya yükleniyor: ${file.name}...`, time: 'Şimdi', isSystem: true }])
+      
+      const res = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) {
+        throw new Error('Dosya yükleme başarısız.')
+      }
+      const data = await res.json()
+      
+      const newFile = {
+        name: data.fileName || file.name,
+        size: data.fileSize || ((file.size / (1024 * 1024)).toFixed(1) + ' MB'),
+        url: data.url,
+        sender: userRole === 'business' ? 'Danışman' : 'Öğrenci',
+        time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+      }
+      setFiles((prev) => [...prev, newFile])
+      setChatMessages((p) => [...p, { sender: 'Sistem', text: `Yeni dosya yüklendi: ${file.name}`, time: 'Şimdi', isSystem: true }])
+    } catch (err: any) {
+      setChatMessages((p) => [...p, { sender: 'Sistem', text: `Dosya yüklenirken hata oluştu: ${err.message}`, time: 'Şimdi', isSystem: true }])
     }
-    setFiles((prev) => [...prev, newFile])
-    setChatMessages((p) => [...p, { sender: 'Sistem', text: `Yeni dosya yüklendi: ${file.name}`, time: 'Şimdi', isSystem: true }])
   }
 
   const sendChatMessage = (e: React.FormEvent) => {
@@ -186,74 +211,8 @@ export default function MeetingRoomPage() {
         
         {/* ── Video Grid ── */}
         <div className="flex-1 p-6 flex flex-col items-center justify-center">
-          <div className="grid w-full h-full max-w-5xl grid-cols-1 md:grid-cols-2 gap-6 items-center justify-center">
-            
-            {/* 1. Local Video Feed */}
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-slate-800 bg-[#161e31] shadow-2xl flex items-center justify-center">
-              {videoActive && !streamError ? (
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="h-full w-full object-cover scale-x-[-1]"
-                />
-              ) : (
-                <div className="text-center p-4">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-800 text-slate-400 mb-3 border border-slate-700">
-                    <VideoOff className="h-8 w-8" />
-                  </div>
-                  <p className="text-xs font-bold text-slate-400">Kameranız Kapalı</p>
-                </div>
-              )}
-              <span className="absolute bottom-4 left-4 rounded-lg bg-slate-900/80 px-3 py-1.5 text-xs font-bold text-white border border-slate-700 shadow flex items-center gap-1.5">
-                {!micActive && <MicOff className="h-3 w-3 text-red-500" />}
-                {userName} (Siz)
-              </span>
-            </div>
-
-            {/* 2. Advisor / Partner Video Feed */}
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-slate-800 bg-[#161e31] shadow-2xl flex items-center justify-center">
-              {/* Partner Avatar Falling back to nice graphic */}
-              <div className="text-center p-4 flex flex-col items-center">
-                <div className="relative h-24 w-24 overflow-hidden rounded-full border border-slate-700 mb-4 bg-slate-800 shadow-xl">
-                  <img
-                    src={
-                      userRole === 'business'
-                        ? 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=faces'
-                        : 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=faces'
-                    }
-                    alt="Katılımcı"
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 border-2 border-primary rounded-full animate-ping opacity-35" />
-                </div>
-                <h4 className="text-sm font-bold text-white">
-                  {userRole === 'business' ? 'Ahmet Yılmaz (Öğrenci)' : 'Prof. Dr. Albert Ali Salah (Danışman)'}
-                </h4>
-                <div className="flex items-center gap-1 mt-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] text-slate-400 font-bold">Ses Bağlantısı Aktif</span>
-                </div>
-                {/* Simulated Audio Wave Visualizer */}
-                <div className="flex items-end gap-1 mt-4 h-4">
-                  {[1, 2, 3, 4, 5, 4, 3, 2, 1, 2, 3].map((_, idx) => (
-                    <motion.div
-                      key={idx}
-                      animate={{ height: [4, 16, 4] }}
-                      transition={{ duration: 1 + idx * 0.1, repeat: Infinity, ease: 'easeInOut' }}
-                      className="w-1 rounded-full bg-primary"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <span className="absolute bottom-4 left-4 rounded-lg bg-slate-900/80 px-3 py-1.5 text-xs font-bold text-white border border-slate-700 shadow flex items-center gap-1.5">
-                <Volume2 className="h-3 w-3 text-emerald-400" />
-                {userRole === 'business' ? 'Ahmet Yılmaz' : 'Prof. Dr. Albert Ali Salah'}
-              </span>
-            </div>
-
+          <div className="w-full h-full max-w-5xl rounded-2xl overflow-hidden border border-slate-800 bg-[#161e31] shadow-2xl">
+            <div id="jitsi-container" className="w-full h-full" />
           </div>
         </div>
 
@@ -329,7 +288,14 @@ export default function MeetingRoomPage() {
                         <FileText className="h-4.5 w-4.5" />
                       </div>
                       <div className="flex-1 overflow-hidden">
-                        <span className="block truncate text-xs font-bold text-slate-200">{file.name}</span>
+                        <a
+                          href={file.url ? `http://localhost:8081${file.url}` : '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block truncate text-xs font-bold text-slate-200 hover:text-primary transition-all"
+                        >
+                          {file.name}
+                        </a>
                         <span className="text-[9px] text-slate-500 font-medium block mt-0.5">
                           {file.size} • {file.sender} tarafından • {file.time}
                         </span>

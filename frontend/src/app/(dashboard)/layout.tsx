@@ -20,7 +20,8 @@ import {
   Users,
   CheckCheck,
   MessageSquare,
-  GraduationCap
+  GraduationCap,
+  Building2
 } from 'lucide-react'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -96,6 +97,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         menuItems: [
           { label: 'Genel Bakış', href: '/admin', icon: LayoutDashboard },
           { label: 'Kullanıcı Yönetimi', href: '/admin/users', icon: Users },
+          { label: 'Okul & Oda Yönetimi', href: '/admin/rooms', icon: Building2 },
           { label: 'Sistem Analitiği', href: '/admin/analytics', icon: BarChart3 },
           { label: 'Sistem Ayarları', href: '/admin/settings', icon: Settings },
         ]

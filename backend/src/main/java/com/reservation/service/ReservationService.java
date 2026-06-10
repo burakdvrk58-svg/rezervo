@@ -1,5 +1,6 @@
 package com.reservation.service;
 
+import com.reservation.config.ChatWebSocketHandler;
 import com.reservation.dto.ReservationRequestDto;
 import com.reservation.dto.ReservationResponseDto;
 import com.reservation.model.Reservation;
@@ -33,17 +34,20 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final ReviewRepository reviewRepository;
+    private final MailService mailService;
 
     public ReservationService(ReservationRepository reservationRepository,
                               RoomRepository roomRepository,
                               UserRepository userRepository,
                               NotificationRepository notificationRepository,
-                              ReviewRepository reviewRepository) {
+                              ReviewRepository reviewRepository,
+                              MailService mailService) {
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
         this.reviewRepository = reviewRepository;
+        this.mailService = mailService;
     }
 
     @Transactional
@@ -104,7 +108,8 @@ public class ReservationService {
             notification.setDescription(user.getFullName() + " " + room.getName() + " için randevu talebi gönderdi.");
             notification.setCreatedAt(LocalDateTime.now());
             notification.setUnread(true);
-            notificationRepository.save(notification);
+            Notification savedNotif = notificationRepository.save(notification);
+            pushNotificationOverWebSocket(savedNotif);
         }
 
         return mapToResponseDto(saved);
@@ -146,7 +151,23 @@ public class ReservationService {
                 pending.setDescription(pending.getDescription() != null 
                         ? pending.getDescription() + " (Çakışan başka bir rezervasyon onaylandığı için sistem tarafından otomatik reddedildi.)"
                         : "Çakışan başka bir rezervasyon onaylandığı için sistem tarafından otomatik reddedildi.");
-                reservationRepository.save(pending);
+                Reservation savedPending = reservationRepository.save(pending);
+                
+                // Send mail to automatically rejected student
+                try {
+                    mailService.sendReservationMail(
+                        savedPending.getUser().getEmail(),
+                        savedPending.getUser().getFullName(),
+                        savedPending.getDescription() != null ? savedPending.getDescription() : "Akademik Görüşme",
+                        savedPending.getRoom().getName(),
+                        savedPending.getDate().toString(),
+                        savedPending.getStartTime().toString() + " - " + savedPending.getEndTime().toString(),
+                        false,
+                        null
+                    );
+                } catch (Exception e) {
+                    System.out.println("Otomatik red e-postası gönderilemedi: " + e.getMessage());
+                }
             }
         }
 
@@ -158,7 +179,24 @@ public class ReservationService {
         notification.setDescription(approved.getRoom().getName() + " randevunuz onaylandı.");
         notification.setCreatedAt(LocalDateTime.now());
         notification.setUnread(true);
-        notificationRepository.save(notification);
+        Notification savedNotif = notificationRepository.save(notification);
+        pushNotificationOverWebSocket(savedNotif);
+
+        // Send mail to approved student
+        try {
+            mailService.sendReservationMail(
+                approved.getUser().getEmail(),
+                approved.getUser().getFullName(),
+                approved.getDescription() != null ? approved.getDescription() : "Akademik Görüşme",
+                approved.getRoom().getName(),
+                approved.getDate().toString(),
+                approved.getStartTime().toString() + " - " + approved.getEndTime().toString(),
+                true,
+                approved.getMeetingUrl()
+            );
+        } catch (Exception e) {
+            System.out.println("Onay e-postası gönderilemedi: " + e.getMessage());
+        }
 
         return mapToResponseDto(approved);
     }
@@ -179,7 +217,24 @@ public class ReservationService {
         notification.setDescription(rejected.getRoom().getName() + " randevu talebiniz reddedildi.");
         notification.setCreatedAt(LocalDateTime.now());
         notification.setUnread(true);
-        notificationRepository.save(notification);
+        Notification savedNotif = notificationRepository.save(notification);
+        pushNotificationOverWebSocket(savedNotif);
+
+        // Send mail to rejected student
+        try {
+            mailService.sendReservationMail(
+                rejected.getUser().getEmail(),
+                rejected.getUser().getFullName(),
+                rejected.getDescription() != null ? rejected.getDescription() : "Akademik Görüşme",
+                rejected.getRoom().getName(),
+                rejected.getDate().toString(),
+                rejected.getStartTime().toString() + " - " + rejected.getEndTime().toString(),
+                false,
+                null
+            );
+        } catch (Exception e) {
+            System.out.println("Red e-postası gönderilemedi: " + e.getMessage());
+        }
 
         return mapToResponseDto(rejected);
     }
@@ -288,5 +343,24 @@ public class ReservationService {
         dto.setReviewed(reviewRepository.existsByBookingId("res-" + reservation.getId()));
         dto.setCreatedAt(reservation.getCreatedAt());
         return dto;
+    }
+
+    private void pushNotificationOverWebSocket(Notification savedNotif) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", "notif-" + savedNotif.getId());
+            map.put("userId", savedNotif.getUser().getUsername().equals("customer") ? "u-student" : "u-academician");
+            map.put("role", savedNotif.getRole());
+            map.put("title", savedNotif.getTitle());
+            map.put("desc", savedNotif.getDescription());
+            map.put("time", "Şimdi");
+            map.put("unread", savedNotif.isUnread());
+
+            String json = mapper.writeValueAsString(map);
+            ChatWebSocketHandler.sendToUser(savedNotif.getUser().getUsername(), "{\"type\":\"NOTIFICATION\",\"data\":" + json + "}");
+        } catch (Exception e) {
+            System.err.println("Failed to push notification over WebSocket: " + e.getMessage());
+        }
     }
 }

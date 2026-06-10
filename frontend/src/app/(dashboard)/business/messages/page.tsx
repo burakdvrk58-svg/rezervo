@@ -16,7 +16,7 @@ export default function BusinessMessagesPage() {
   const [academicianData, setAcademicianData] = useState<any>(null)
   
   const chatEndRef = useRef<HTMLDivElement>(null)
-  const pollIntervalRef = useRef<any>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [academicianId, setAcademicianId] = useState<string>('u-academician')
 
@@ -104,6 +104,8 @@ export default function BusinessMessagesPage() {
     }
   }
 
+  const wsRef = useRef<WebSocket | null>(null)
+
   // Load contacts and select first contact on mount or when academicianId changes
   useEffect(() => {
     document.title = 'Mesajlarım | Akademisyen Paneli'
@@ -113,21 +115,61 @@ export default function BusinessMessagesPage() {
     }
   }, [academicianId])
 
-  // Poll current thread and contact list for new messages
+  // Setup WebSocket connection
+  useEffect(() => {
+    if (!academicianId || academicianId === 'u-academician') return
+
+    const connectWs = () => {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const ws = new WebSocket(`${protocol}//localhost:8081/ws/chat?username=${academicianId}`)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        console.log('WebSocket Connected.')
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data)
+          if (payload.type === 'CHAT') {
+            const newMsg = payload.data
+            // If the message belongs to the currently active conversation, append it
+            setActiveContact((currentContact: any) => {
+              if (currentContact && (newMsg.senderId === currentContact.id || newMsg.receiverId === currentContact.id)) {
+                setMessages((prev) => {
+                  if (prev.some((m) => m.id === newMsg.id)) return prev
+                  return [...prev, newMsg]
+                })
+              }
+              return currentContact
+            })
+            // Refresh contacts list to show last message
+            fetchContactsAndMessages(false)
+          }
+        } catch (err) {
+          console.error('WebSocket message parse error:', err)
+        }
+      }
+
+      ws.onclose = () => {
+        console.log('WebSocket Disconnected. Reconnecting in 5s...')
+        setTimeout(connectWs, 5000)
+      }
+    }
+
+    connectWs()
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+    }
+  }, [academicianId])
+
+  // Load thread when active contact changes
   useEffect(() => {
     if (activeContact) {
       fetchThread(activeContact.id)
-      
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
-      
-      pollIntervalRef.current = setInterval(() => {
-        fetchThread(activeContact.id)
-        fetchContactsAndMessages(false)
-      }, 5000)
-    }
-
-    return () => {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
     }
   }, [activeContact])
 
@@ -164,6 +206,52 @@ export default function BusinessMessagesPage() {
       console.error('Failed to send message:', err)
     } finally {
       setIsSending(false)
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !activeContact) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      setIsSending(true)
+      const uploadRes = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: formData
+      })
+      if (!uploadRes.ok) {
+        throw new Error('Dosya yüklenemedi.')
+      }
+      const data = await uploadRes.json()
+      
+      const fileLink = `http://localhost:8081${data.url}`
+      const messageText = `📁 Paylaşılan Dosya: ${data.fileName} (${data.fileSize}) - Link: ${fileLink}`
+
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          senderId: academicianId,
+          receiverId: activeContact.id,
+          content: messageText
+        })
+      })
+
+      if (res.ok) {
+        const newMsg = await res.json()
+        setMessages((prev) => [...prev, newMsg])
+        fetchContactsAndMessages(false)
+      }
+    } catch (err: any) {
+      alert('Dosya yüklenirken hata oluştu: ' + err.message)
+    } finally {
+      setIsSending(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
     }
   }
 
@@ -317,7 +405,24 @@ export default function BusinessMessagesPage() {
                             : 'bg-white text-slate-800 border border-slate-100 rounded-bl-none'
                         }`}
                       >
-                        <p className="font-medium">{msg.content}</p>
+                        <p className="font-medium">
+                          {msg.content.includes(' - Link: http://localhost:8081/uploads/') ? (
+                            <>
+                              {msg.content.split(' - Link: ')[0]}
+                              {' - '}
+                              <a
+                                href={msg.content.split(' - Link: ')[1]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline hover:text-slate-200 font-bold"
+                              >
+                                Dosyayı İndir
+                              </a>
+                            </>
+                          ) : (
+                            msg.content
+                          )}
+                        </p>
                         <div className="flex items-center justify-between gap-2 mt-1.5">
                           {msg.isAI && (
                             <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[8px] font-bold ${isMe ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-700'}`}>
@@ -339,9 +444,15 @@ export default function BusinessMessagesPage() {
             {/* Input form */}
             <form onSubmit={handleSendMessage} className="p-4 border-t border-slate-200 bg-white">
               <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
                 <button
                   type="button"
-                  onClick={() => alert('Dosya ekleme simülasyonu: Lütfen dosyayı sürükleyip görüntülü görüşme odasındaki dosya alanına atın.')}
+                  onClick={() => fileInputRef.current?.click()}
                   className="rounded-xl p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none"
                   title="Dosya Ekle"
                 >

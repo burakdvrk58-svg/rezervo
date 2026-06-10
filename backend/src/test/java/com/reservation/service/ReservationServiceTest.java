@@ -2,11 +2,14 @@ package com.reservation.service;
 
 import com.reservation.dto.ReservationRequestDto;
 import com.reservation.dto.ReservationResponseDto;
+import com.reservation.model.Notification;
 import com.reservation.model.Reservation;
 import com.reservation.model.ReservationStatus;
 import com.reservation.model.Room;
 import com.reservation.model.User;
+import com.reservation.repository.NotificationRepository;
 import com.reservation.repository.ReservationRepository;
+import com.reservation.repository.ReviewRepository;
 import com.reservation.repository.RoomRepository;
 import com.reservation.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,11 +40,29 @@ class ReservationServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
+    @Mock
+    private NotificationRepository notificationRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    private MailService mailService;
+
     private ReservationService reservationService;
 
     private User user;
     private Room room;
+
+    static class TestMailService extends MailService {
+        public TestMailService() {
+            super(null);
+        }
+
+        @Override
+        public void sendReservationMail(String toEmail, String studentName, String title, String roomName, String dateStr, String timeStr, boolean approved, String meetingUrl) {
+            // Stubbed
+        }
+    }
 
     @BeforeEach
     void setUp() {
@@ -56,6 +77,25 @@ class ReservationServiceTest {
         room.setName("Meeting Room A");
         room.setStartHour(LocalTime.of(9, 0));
         room.setEndHour(LocalTime.of(18, 0));
+
+        mailService = new TestMailService();
+        reservationService = new ReservationService(
+                reservationRepository,
+                roomRepository,
+                userRepository,
+                notificationRepository,
+                reviewRepository,
+                mailService
+        );
+
+        // Setup notificationRepository save mock to avoid NullPointerException
+        when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
+            Notification n = invocation.getArgument(0);
+            if (n.getId() == null) {
+                n.setId(999L);
+            }
+            return n;
+        });
     }
 
     @Test

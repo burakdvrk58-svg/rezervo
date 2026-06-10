@@ -1,5 +1,6 @@
 package com.reservation.controller;
 
+import com.reservation.config.ChatWebSocketHandler;
 import com.reservation.dto.ContactResponseDto;
 import com.reservation.dto.MessageRequestDto;
 import com.reservation.dto.MessageResponseDto;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -23,6 +25,7 @@ public class MessageController {
 
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     // Turkish locale date time formatter: e.g. "09 Haziran Salı, 22:15"
     private final DateTimeFormatter trDateTimeFormatter = 
@@ -155,10 +158,17 @@ public class MessageController {
         message.setAi(request.isAI());
 
         Message saved = messageRepository.save(message);
+        MessageResponseDto responseDto = mapToMessageResponseDto(saved);
 
-        // Note: The frontend Next.js API layer will handle AI deflection checks using db.json active AI settings 
-        // and post the AI message response back to the backend. We will return the saved student message.
-        return ResponseEntity.ok(mapToMessageResponseDto(saved));
+        // Send via WebSocket to receiver
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(responseDto);
+            ChatWebSocketHandler.sendToUser(receiver.getUsername(), "{\"type\":\"CHAT\",\"data\":" + jsonPayload + "}");
+        } catch (Exception e) {
+            System.err.println("Failed to send WebSocket message: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(responseDto);
     }
 
     private MessageResponseDto mapToMessageResponseDto(Message m) {

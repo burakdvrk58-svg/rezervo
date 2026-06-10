@@ -35,35 +35,43 @@ export async function GET(request: Request) {
       }
 
       // Map Spring Boot rooms to library rooms and classrooms
-      const libraryRooms = sqlRooms.length > 0 
-        ? sqlRooms.filter((r: any) => r.name.toLowerCase().includes('çalışma') || r.name.toLowerCase().includes('kabin')).map((r: any) => ({
-            id: `lr-1-${r.id}`,
-            name: r.name,
-            capacity: `${r.capacity} Kişi`,
-            description: r.description,
-            floor: 'Kat 1',
-            image: r.name.toLowerCase().includes('grup') 
-              ? 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop'
-              : 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop',
-            rating: '4.9',
-            type: r.name.toLowerCase().includes('sessiz') || r.name.toLowerCase().includes('bireysel') ? 'silent' : 'group'
-          }))
-        : (university.libraryRooms || [])
+      const sqlUnivLibraryRooms = sqlRooms.filter((r: any) => 
+        (r.name.toLowerCase().includes('çalışma') || r.name.toLowerCase().includes('kabin') || r.name.toLowerCase().includes('sessiz') || r.name.toLowerCase().includes('oda')) &&
+        r.name.includes(`[${university.shortName}]`)
+      ).map((r: any) => ({
+        id: `lr-sql-${r.id}`,
+        sqlId: r.id,
+        name: r.name.replace(`[${university.shortName}] `, '').replace(`[${university.shortName}]`, ''),
+        capacity: `${r.capacity} Kişi`,
+        description: r.description,
+        floor: 'Kat 1',
+        image: r.name.toLowerCase().includes('grup') 
+          ? 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=300&h=200&fit=crop'
+          : 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&h=200&fit=crop',
+        rating: '4.9',
+        type: r.name.toLowerCase().includes('sessiz') || r.name.toLowerCase().includes('bireysel') ? 'silent' : 'group'
+      }))
 
-      const classrooms = sqlRooms.length > 0
-        ? sqlRooms.filter((r: any) => r.name.toLowerCase().includes('derslik') || r.name.toLowerCase().includes('seminer')).map((r: any) => ({
-            id: `cr-1-${r.id}`,
-            name: r.name,
-            capacity: `${r.capacity} Kişi`,
-            description: r.description,
-            floor: 'Kat 1',
-            image: r.name.toLowerCase().includes('seminer')
-              ? 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop'
-              : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop',
-            rating: '4.8',
-            type: r.name.toLowerCase().includes('seminer') ? 'seminar' : 'lecture'
-          }))
-        : (university.classrooms || [])
+      const libraryRooms = [...(university.libraryRooms || []), ...sqlUnivLibraryRooms]
+
+      const sqlUnivClassrooms = sqlRooms.filter((r: any) => 
+        (r.name.toLowerCase().includes('derslik') || r.name.toLowerCase().includes('seminer') || r.name.toLowerCase().includes('salon')) &&
+        r.name.includes(`[${university.shortName}]`)
+      ).map((r: any) => ({
+        id: `cr-sql-${r.id}`,
+        sqlId: r.id,
+        name: r.name.replace(`[${university.shortName}] `, '').replace(`[${university.shortName}]`, ''),
+        capacity: `${r.capacity} Kişi`,
+        description: r.description,
+        floor: 'Kat 1',
+        image: r.name.toLowerCase().includes('seminer')
+          ? 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=300&h=200&fit=crop'
+          : 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=300&h=200&fit=crop',
+        rating: '4.8',
+        type: r.name.toLowerCase().includes('seminer') ? 'seminar' : 'lecture'
+      }))
+
+      const classrooms = [...(university.classrooms || []), ...sqlUnivClassrooms]
 
       return NextResponse.json({
         university: {
@@ -88,12 +96,96 @@ export async function GET(request: Request) {
       campus: u.campus,
       logo: u.logo,
       image: u.image,
-      libraryRoomCount: sqlRooms.length > 0 ? sqlRooms.filter((r: any) => r.name.toLowerCase().includes('çalışma') || r.name.toLowerCase().includes('kabin')).length : (u.libraryRooms?.length || 0),
-      classroomCount: sqlRooms.length > 0 ? sqlRooms.filter((r: any) => r.name.toLowerCase().includes('derslik') || r.name.toLowerCase().includes('seminer')).length : (u.classrooms?.length || 0)
+      libraryRoomCount: (u.libraryRooms?.length || 0) + sqlRooms.filter((r: any) => 
+        (r.name.toLowerCase().includes('çalışma') || r.name.toLowerCase().includes('kabin') || r.name.toLowerCase().includes('sessiz') || r.name.toLowerCase().includes('oda')) &&
+        r.name.includes(`[${u.shortName}]`)
+      ).length,
+      classroomCount: (u.classrooms?.length || 0) + sqlRooms.filter((r: any) => 
+        (r.name.toLowerCase().includes('derslik') || r.name.toLowerCase().includes('seminer') || r.name.toLowerCase().includes('salon')) &&
+        r.name.includes(`[${u.shortName}]`)
+      ).length
     }))
 
     return NextResponse.json(universities)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to read rooms data' }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const { name, description, capacity, startHour, endHour, universityShortName } = await request.json()
+
+    if (!name || !capacity || !startHour || !endHour || !universityShortName) {
+      return NextResponse.json({ error: 'Eksik parametreler.' }, { status: 400 })
+    }
+
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    // Prefix name with [universityShortName] to scope it
+    const prefixedName = `[${universityShortName}] ${name}`
+
+    const res = await fetch('http://localhost:8081/api/rooms', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        name: prefixedName,
+        description,
+        capacity: Number(capacity),
+        startHour,
+        endHour
+      })
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      return NextResponse.json({ error: errorText || 'Oda eklenemedi.' }, { status: res.status })
+    }
+
+    const savedRoom = await res.json()
+    return NextResponse.json(savedRoom)
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Oda ekleme hatası: ' + error.message }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'Oda kimliği (id) gereklidir.' }, { status: 400 })
+    }
+
+    const cookieStore = await cookies()
+    const token = cookieStore.get('rezervo_access_token')?.value
+
+    const headers: Record<string, string> = {}
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const res = await fetch(`http://localhost:8081/api/rooms/${id}`, {
+      method: 'DELETE',
+      headers
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      return NextResponse.json({ error: errorText || 'Oda silinemedi.' }, { status: res.status })
+    }
+
+    return NextResponse.json({ success: true, message: 'Oda silindi.' })
+  } catch (error: any) {
+    return NextResponse.json({ error: 'Oda silme hatası: ' + error.message }, { status: 500 })
   }
 }
