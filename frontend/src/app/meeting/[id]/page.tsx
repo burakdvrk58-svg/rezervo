@@ -289,7 +289,7 @@ export default function MeetingRoomPage() {
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <a
-                          href={file.url ? `http://localhost:8081${file.url}` : '#'}
+                          href={file.url ? `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081'}${file.url}` : '#'}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="block truncate text-xs font-bold text-slate-200 hover:text-primary transition-all"

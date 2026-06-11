@@ -72,7 +72,8 @@ export default function CustomerMessagesPage() {
 
     const connectWs = () => {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const ws = new WebSocket(`${protocol}//localhost:8081/ws/chat?username=${studentId}`)
+      const backendHost = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081').replace(/^https?:\/\//, '')
+      const ws = new WebSocket(`${protocol}//${backendHost}/ws/chat?username=${studentId}`)
       wsRef.current = ws
 
       ws.onopen = () => {
@@ -178,7 +179,7 @@ export default function CustomerMessagesPage() {
       }
       const data = await uploadRes.json()
       
-      const fileLink = `http://localhost:8081${data.url}`
+      const fileLink = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081'}${data.url}`
       const messageText = `📁 Paylaşılan Dosya: ${data.fileName} (${data.fileSize}) - Link: ${fileLink}`
 
       const res = await fetch('/api/messages', {
@@ -328,7 +329,7 @@ export default function CustomerMessagesPage() {
                         }`}
                       >
                         <p className="font-medium">
-                          {msg.content.includes(' - Link: http://localhost:8081/uploads/') ? (
+                          {(msg.content.includes(' - Link: http://localhost:8081/uploads/') || msg.content.includes(` - Link: ${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8081'}/uploads/`)) ? (
                             <>
                               {msg.content.split(' - Link: ')[0]}
                               {' - '}
